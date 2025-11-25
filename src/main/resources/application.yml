@@ -1,0 +1,3 @@
+
+shepherd:
+  github-token: ${GITHUB_PERSONAL_ACCESS_TOKEN:#{null}}

@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.embabel.template
+package com.embabel.shepherd
 
 import com.embabel.agent.config.annotation.EnableAgents
 import com.embabel.agent.config.annotation.LoggingThemes
+import com.embabel.shepherd.conf.ShepherdProperties
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-@EnableAgents(loggingTheme = LoggingThemes.STAR_WARS)
-class ProjectNameApplication
+@EnableConfigurationProperties(ShepherdProperties::class)
+@EnableAgents(loggingTheme = LoggingThemes.SEVERANCE)
+class ShepherdApplication
 
 fun main(args: Array<String>) {
-    runApplication<ProjectNameApplication>(*args)
+    runApplication<ShepherdApplication>(*args)
 }
