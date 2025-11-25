@@ -1,0 +1,14 @@
+
+embabel-agent-api/src/main/resources/mcp/**
+
+/target/**
+*/target/**
+*/*/target/**
+*/*/*/target/**
+
+.idea/workspace.xml
+
+**/*.log
+
+.claude
+.idea
