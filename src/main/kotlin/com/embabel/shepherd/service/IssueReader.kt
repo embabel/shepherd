@@ -5,11 +5,11 @@ import com.embabel.shepherd.conf.ShepherdProperties
 import org.kohsuke.github.GHDirection
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHIssueSearchBuilder
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.kohsuke.github.GitHub
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 /**
@@ -51,9 +51,17 @@ class GitHubConfig(
 //            emptyList()
 //        }
 //    }
+}
+
+@Service
+class IssueReader(
+    private val github: GitHub,
+) {
+
+    private val logger = LoggerFactory.getLogger(IssueReader::class.java)
 
     // Get recently updated issues for repositories you're involved in
-    fun getMyRecentIssues(hoursBack: Int = 24): List<GHIssue> {
+    fun getRecentIssues(hoursBack: Int = 24, max: Int = 10): List<GHIssue> {
         return try {
             val since = LocalDateTime.now().minusHours(hoursBack.toLong())
             val sinceString = since.toString() + "Z"
@@ -64,7 +72,7 @@ class GitHubConfig(
                 .sort(GHIssueSearchBuilder.Sort.UPDATED)
                 .order(GHDirection.DESC)
                 .list()
-                .take(50)
+                .take(max)
                 .toList()
         } catch (e: Exception) {
             logger.info("Error fetching my recent issues: ${e.message}")
