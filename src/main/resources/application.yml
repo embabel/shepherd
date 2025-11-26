@@ -3,3 +3,14 @@ shepherd:
   first-responder-llm:
     model: gpt-4.1-mini
     temperature: 0.3
+
+
+database:
+  dataSources:
+    neo:
+      type: NEO4J
+      userName: neo4j
+      password: brahmsian
+      host: localhost
+      port: 7687
+      databaseName: neo4j

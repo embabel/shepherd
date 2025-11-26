@@ -33,7 +33,8 @@ class IssueActions(
     @Action
     fun reactToNewIssue(issue: GHIssue, ai: Ai): IssueReaction {
         logger.info("Found new issue to react to: #{}, title='{}'", issue.number, issue.title)
-        val firstResponse = ai.withLlm(properties.firstResponderLlm)
+        val firstResponse = ai
+            .withLlm(properties.firstResponderLlm)
             .withId("first_response")
             .creating(FirstResponse::class.java)
             .fromTemplate(
@@ -47,6 +48,7 @@ class IssueActions(
             firstResponse.urgency,
             firstResponse.sentiment,
         )
+
         return IssueReaction(
             ghIssue = issue,
             firstResponse = firstResponse,
@@ -59,6 +61,7 @@ class IssueActions(
         return Person(name = issue.user.name, bio = issue.user.bio)
     }
 
+    // TODO note that naming comes from blackboard, not parameter name
     @Action(
         pre = ["spel:issueReaction.firstResponse.urgency > 0.0"]
     )
