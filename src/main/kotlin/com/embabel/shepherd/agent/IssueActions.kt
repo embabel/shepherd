@@ -6,10 +6,11 @@ import com.embabel.agent.api.common.Ai
 import com.embabel.common.core.types.ZeroToOne
 import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Person
+import com.embabel.shepherd.domain.PersonRepository
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 data class FirstResponse(
     val comment: String,
@@ -27,6 +28,7 @@ data class IssueReaction(
 @EmbabelComponent
 class IssueActions(
     val properties: ShepherdProperties,
+    private val personRepository: PersonRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(IssueActions::class.java)
@@ -50,21 +52,27 @@ class IssueActions(
             firstResponse.sentiment,
         )
 
+        personRepository.save(issue)
+
         return IssueReaction(
             ghIssue = issue,
             firstResponse = firstResponse,
         )
     }
 
+    /**
+     * When we see an issue we check whether or not the person raising it is already known to us.
+     */
     @Action
     fun researchRaiser(issue: GHIssue): Person {
-        // TODO look up person
-        return Person(
+        val newPerson = Person(
             uuid = UUID.randomUUID(),
             name = issue.user.name,
             bio = issue.user.bio,
-            githubId = "anything"
+            githubId = issue.user.login,
         )
+        val savedPerson = personRepository.save(newPerson)
+        return savedPerson
     }
 
     // TODO note that naming comes from blackboard, not parameter name
