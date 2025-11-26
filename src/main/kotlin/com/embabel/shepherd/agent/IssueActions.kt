@@ -5,6 +5,7 @@ import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.Ai
 import com.embabel.common.core.types.ZeroToOne
 import com.embabel.shepherd.conf.ShepherdProperties
+import com.embabel.shepherd.domain.Person
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.slf4j.LoggerFactory
@@ -50,5 +51,18 @@ class IssueActions(
             ghIssue = issue,
             firstResponse = firstResponse,
         )
+    }
+
+    @Action
+    fun researchRaiser(issue: GHIssue): Person {
+        // TODO look up person
+        return Person(name = issue.user.name, bio = issue.user.bio)
+    }
+
+    @Action(
+        pre = ["spel:issueReaction.firstResponse.urgency > 0.0"]
+    )
+    fun heavyHitter(issue: GHIssue, reaction: IssueReaction) {
+        println("Taking heavy hitter action on issue #${issue.number}")
     }
 }
