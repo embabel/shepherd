@@ -8,9 +8,18 @@ import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Person
 import com.embabel.shepherd.domain.PersonRepository
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.kohsuke.github.GHIssue
 import org.slf4j.LoggerFactory
 import java.util.*
+
+data class NewIssue(
+    val ghIssue: GHIssue,
+)
+
+data class UpdatedIssue(
+    val ghIssue: GHIssue,
+)
 
 data class FirstResponse(
     val comment: String,
@@ -29,33 +38,43 @@ data class IssueReaction(
 class IssueActions(
     val properties: ShepherdProperties,
     private val personRepository: PersonRepository,
+    private val jacksonObjectMapper: ObjectMapper,
 ) {
 
     private val logger = LoggerFactory.getLogger(IssueActions::class.java)
 
     @Action
-    fun reactToNewIssue(issue: GHIssue, ai: Ai): IssueReaction {
-        logger.info("Found new issue to react to: #{}, title='{}'", issue.number, issue.title)
+    fun publishNewIssue(issue: GHIssue): NewIssue? {
+        // TODO look up whether it's new
+        return NewIssue(ghIssue = issue)
+    }
+
+    @Action
+    fun reactToNewIssue(newIssue: NewIssue, ai: Ai): IssueReaction {
+        logger.info(
+            "Found new issue to react to: #{}, title='{}'",
+            newIssue.ghIssue.number, newIssue.ghIssue.title
+        )
         val firstResponse = ai
             .withLlm(properties.firstResponderLlm)
             .withId("first_response")
             .creating(FirstResponse::class.java)
             .fromTemplate(
                 "first_response",
-                mapOf("issue" to issue),
+                mapOf("issue" to newIssue.ghIssue),
             )
         logger.info(
             "Generated first response for issue #{}: comment='{}', urgency={}, sentiment={}",
-            issue.number,
+            newIssue.ghIssue.number,
             firstResponse.comment,
             firstResponse.urgency,
             firstResponse.sentiment,
         )
 
-        personRepository.save(issue)
+        personRepository.save(newIssue.ghIssue)
 
         return IssueReaction(
-            ghIssue = issue,
+            ghIssue = newIssue.ghIssue,
             firstResponse = firstResponse,
         )
     }
