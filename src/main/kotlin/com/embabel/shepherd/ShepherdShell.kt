@@ -14,8 +14,9 @@ class ShepherdShell(
 
     @ShellMethod("run")
     fun run() {
-        val lastIssue = issueReader.getRecentIssues(200, 1).single()
+        val lastIssue = issueReader.getMyRecentIssues(200, 1).single()
         UtilityInvocation.on(agentPlatform)
+            .terminateWhenStuck()
             .run(lastIssue)
     }
 }

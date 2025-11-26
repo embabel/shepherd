@@ -1,5 +1,6 @@
 package com.embabel.shepherd.conf
 
+import com.embabel.common.ai.model.LlmOptions
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 /**
@@ -10,4 +11,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "shepherd")
 data class ShepherdProperties(
     val githubToken: String? = null,
+    val firstResponderLlm: LlmOptions,
 )
