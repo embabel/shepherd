@@ -9,6 +9,7 @@ import com.embabel.shepherd.domain.Person
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 data class FirstResponse(
     val comment: String,
@@ -58,7 +59,12 @@ class IssueActions(
     @Action
     fun researchRaiser(issue: GHIssue): Person {
         // TODO look up person
-        return Person(name = issue.user.name, bio = issue.user.bio)
+        return Person(
+            uuid = UUID.randomUUID(),
+            name = issue.user.name,
+            bio = issue.user.bio,
+            githubId = "anything"
+        )
     }
 
     // TODO note that naming comes from blackboard, not parameter name
