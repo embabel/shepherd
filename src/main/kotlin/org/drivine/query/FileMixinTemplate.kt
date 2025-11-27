@@ -12,9 +12,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.File
 import java.nio.file.Path
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.javaType
 
 /**
  * File-based implementation of MixinTemplate that serializes entities to JSON files.
@@ -167,8 +166,10 @@ class FileMixinTemplate(
         return when (storedTypeName) {
             "RaisableIssue" -> RaisableIssue::class.java.isAssignableFrom(classType) ||
                     classType.isAssignableFrom(RaisableIssue::class.java)
+
             "Issue" -> Issue::class.java.isAssignableFrom(classType) ||
                     classType.isAssignableFrom(Issue::class.java)
+
             else -> {
                 // Try to load the concrete class
                 val concreteClass = try {
