@@ -1,6 +1,7 @@
 package com.embabel.shepherd.domain
 
 import org.drivine.manager.PersistenceManager
+import org.drivine.query.DrivineTemplate
 import org.drivine.query.QuerySpecification
 import org.drivine.utils.ObjectUtils
 import org.kohsuke.github.GHIssue
@@ -116,27 +117,6 @@ interface IssueRepository {
     fun <T : Issue> eraseSpecialization(id: Long, mixin: Class<T>): Issue?
 
     fun findRaisedIssuesByRaiserName(name: String): Iterable<RaisableIssue>
-
-}
-
-interface DrivineTemplate {
-
-    /**
-     * Find entities matching the given where clause, applying the given mixins.
-     * The whereClause merely finds the id. The convention is that n
-     * will be the node being queried.
-     */
-    fun <T> findWhere(whereClause: String, mixins: List<Class<out T>>): Iterable<T>
-
-    fun <T> findById(id: Long, mixins: List<Class<out T>>): T?
-
-    fun <T> findById(id: Long): T? = findById(id, emptyList())
-
-    fun <T, U : T> findById(id: Long, mixin: Class<U>): U?
-
-    fun <T> save(entity: T): T
-
-    fun <T, U : T> eraseSpecialization(entity: U, mixin: Class<U>): T?
 
 }
 
