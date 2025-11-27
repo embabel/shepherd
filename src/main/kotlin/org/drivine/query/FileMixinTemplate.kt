@@ -1,11 +1,17 @@
 package org.drivine.query
 
 import com.embabel.shepherd.domain.HasUUID
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.File
 import java.nio.file.Path
-import kotlin.reflect.full.isSuperclassOf
+import java.util.UUID
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaType
 
 /**
  * File-based implementation of MixinTemplate that serializes entities to JSON files.
@@ -14,7 +20,10 @@ import kotlin.reflect.full.isSuperclassOf
  */
 class FileMixinTemplate(
     private val baseDir: Path = Path.of(".data"),
-    private val objectMapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build()),
+    private val objectMapper: ObjectMapper = ObjectMapper()
+        .registerModule(KotlinModule.Builder().build())
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS),
     private val idExtractor: IdExtractor = CompositeIdExtractor(
         AnnotationIdExtractor,
         InterfaceIdExtractor(HasUUID::class.java) { it.uuid })
@@ -45,10 +54,45 @@ class FileMixinTemplate(
         val typeDir = baseDir.resolve(typeName).toFile()
         typeDir.mkdirs()
 
+        // Convert to JSON tree so we can manipulate it
+        val jsonNode = objectMapper.valueToTree<ObjectNode>(entity)
+
+        // Find and extract HasUUID properties, save them separately, replace with references
+        extractAndSaveReferences(entity, jsonNode)
+
         val file = File(typeDir, "$id.json")
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, entity)
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, jsonNode)
 
         return entity
+    }
+
+    /**
+     * Recursively find HasUUID properties, save them separately, and replace with UUID references.
+     */
+    private fun <T> extractAndSaveReferences(entity: T, jsonNode: ObjectNode) {
+        if (entity == null) return
+
+        for (prop in entity::class.memberProperties) {
+            val propName = prop.name
+            val propValue = try {
+                prop.getter.call(entity)
+            } catch (e: Exception) {
+                continue
+            } ?: continue
+
+            // Check if this property is a HasUUID (but not the entity itself)
+            if (propValue is HasUUID && propValue !== entity) {
+                val propType = prop.returnType.javaType
+                // Only extract if it's a concrete HasUUID type (not UUID itself)
+                if (propType is Class<*> && HasUUID::class.java.isAssignableFrom(propType) && propType != UUID::class.java) {
+                    // Save the referenced entity
+                    save(propValue)
+                    // Replace the embedded object with just the UUID reference
+                    jsonNode.put("${propName}Uuid", propValue.uuid.toString())
+                    jsonNode.remove(propName)
+                }
+            }
+        }
     }
 
     override fun <T, U : T> eraseSpecialization(entity: U, mixin: Class<U>): T? {
@@ -82,8 +126,12 @@ class FileMixinTemplate(
             // Load all files from this directory
             typeDir.listFiles { file -> file.extension == "json" }?.forEach { file ->
                 try {
+                    // Read as JSON tree first so we can resolve references
+                    val jsonNode = objectMapper.readTree(file) as ObjectNode
+                    resolveReferences(jsonNode, concreteClass)
+
                     @Suppress("UNCHECKED_CAST")
-                    val entity = objectMapper.readValue(file, concreteClass) as? T
+                    val entity = objectMapper.treeToValue(jsonNode, concreteClass) as? T
                     if (entity != null) {
                         results.add(entity)
                     }
@@ -94,6 +142,71 @@ class FileMixinTemplate(
         }
 
         return results
+    }
+
+    /**
+     * Resolve UUID references back to full entities.
+     * Looks for properties ending in "Uuid" and replaces them with the full entity.
+     */
+    private fun resolveReferences(jsonNode: ObjectNode, targetClass: Class<*>) {
+        // Find all properties in the target class that are HasUUID types
+        val kClass = targetClass.kotlin
+        for (prop in kClass.memberProperties) {
+            val propName = prop.name
+            val propType = prop.returnType.javaType
+
+            // Check if this is a HasUUID property type
+            if (propType is Class<*> && HasUUID::class.java.isAssignableFrom(propType) && propType != UUID::class.java) {
+                val uuidFieldName = "${propName}Uuid"
+                val uuidNode = jsonNode.get(uuidFieldName)
+
+                if (uuidNode != null && uuidNode.isTextual) {
+                    val uuid = UUID.fromString(uuidNode.asText())
+                    // Find the referenced entity
+                    val referencedEntity = findByUuid(uuid, propType)
+                    if (referencedEntity != null) {
+                        // Replace the UUID reference with the full entity
+                        jsonNode.remove(uuidFieldName)
+                        jsonNode.set<JsonNode>(propName, objectMapper.valueToTree(referencedEntity))
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Find an entity by its UUID across all type directories.
+     */
+    private fun findByUuid(uuid: UUID, targetType: Class<*>): Any? {
+        val uuidString = uuid.toString()
+        val dataDirs = baseDir.toFile().listFiles { file -> file.isDirectory } ?: return null
+
+        for (typeDir in dataDirs) {
+            val file = File(typeDir, "$uuidString.json")
+            if (!file.exists()) continue
+
+            val concreteClassName = typeDir.name
+            val concreteClass = try {
+                Class.forName("${getPackageForType(concreteClassName)}.$concreteClassName")
+            } catch (e: ClassNotFoundException) {
+                tryLoadClass(concreteClassName)
+            } ?: continue
+
+            // Check if compatible with target type
+            if (!targetType.isAssignableFrom(concreteClass)) {
+                continue
+            }
+
+            return try {
+                val jsonNode = objectMapper.readTree(file) as ObjectNode
+                // Recursively resolve any nested references
+                resolveReferences(jsonNode, concreteClass)
+                objectMapper.treeToValue(jsonNode, concreteClass)
+            } catch (e: Exception) {
+                null
+            }
+        }
+        return null
     }
 
     private fun getPackageForType(typeName: String): String {

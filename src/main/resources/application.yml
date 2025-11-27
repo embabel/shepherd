@@ -3,6 +3,8 @@ shepherd:
   first-responder-llm:
     model: gpt-4.1-mini
     temperature: 0.3
+  researcher-llm:
+    model: gpt-4.1-mini
 
 
 database:

@@ -12,4 +12,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class ShepherdProperties(
     val githubToken: String? = null,
     val firstResponderLlm: LlmOptions,
+    val researcherLlm: LlmOptions,
 )

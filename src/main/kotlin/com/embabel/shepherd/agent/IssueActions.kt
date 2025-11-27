@@ -3,10 +3,11 @@ package com.embabel.shepherd.agent
 import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.Ai
+import com.embabel.agent.core.CoreToolGroups
 import com.embabel.common.core.types.ZeroToOne
 import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Person
-import com.embabel.shepherd.domain.RaisableIssue
+import com.embabel.shepherd.domain.Profile
 import com.embabel.shepherd.service.Store
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.drivine.query.MixinTemplate
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 data class NewIssue(
     val ghIssue: GHIssue,
-    val issue: RaisableIssue,
+    val issueExpansion: Store.IssueExpansion,
 )
 
 data class UpdatedIssue(
@@ -44,12 +45,15 @@ class IssueActions(
 
     private val logger = LoggerFactory.getLogger(IssueActions::class.java)
 
+    /**
+     * If issue isn't new, no further actions will fire
+     */
     @Action
     fun saveNewIssue(ghIssue: GHIssue): NewIssue? {
         val existing = store.findIssueByGithubId(ghIssue.id)
         if (existing == null) {
-            val issue = store.saveAndExpandIssue(ghIssue)
-            return NewIssue(ghIssue, issue)
+            val issueExpansion = store.saveAndExpandIssue(ghIssue)
+            return NewIssue(ghIssue, issueExpansion)
         }
         logger.info("Issue already known: #${ghIssue.number}, title='${ghIssue.title}'")
         return null
@@ -85,11 +89,27 @@ class IssueActions(
     }
 
     /**
-     * When we see an issue we check whether or not the person raising it is already known to us.
+     * The person raising this issue isn't already known to us.
      */
-    @Action
-    fun researchRaiser(newIssue: NewIssue): Person {
-        return newIssue.issue.raisedBy
+    @Action(
+        pre = ["spel:newIssue.issueExpansion.newPerson != null"]
+    )
+    fun researchRaiser(newIssue: NewIssue, ai: Ai): Person? {
+        val person = newIssue.issueExpansion.newPerson ?: return null
+        val profile = ai
+            .withLlm(properties.researcherLlm)
+            .withId("person_research")
+            .withTools(CoreToolGroups.WEB)
+            .withoutProperties("uuid", "retrieved")
+            .creating(Profile::class.java)
+            .fromTemplate("research_person", mapOf("person" to person))
+        logger.info(
+            "Researched person raising issue #{}: name='{}', profile='{}'",
+            newIssue.ghIssue.number,
+            person.name,
+            profile,
+        )
+        return store.save(person.copy(profile = profile))
     }
 
     // TODO note that naming comes from blackboard, not parameter name

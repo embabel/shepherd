@@ -2,6 +2,7 @@ package com.embabel.shepherd.domain
 
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHIssueStateReason
+import java.time.Instant
 import java.util.*
 
 
@@ -36,10 +37,20 @@ interface Issue : HasUUID {
     val company: String?
 
     fun withRaisedBy(person: Person): RaisableIssue {
-        val self = this
-        return object : RaisableIssue, Issue by self {
-            override val raisedBy: Person = person
-        }
+        return RaisableIssueImpl(
+            uuid = this.uuid,
+            id = this.id,
+            state = this.state,
+            stateReason = this.stateReason,
+            number = this.number,
+            closedAt = this.closedAt,
+            body = this.body,
+            title = this.title,
+            htmlUrl = this.htmlUrl,
+            locked = this.locked,
+            company = this.company,
+            raisedBy = person,
+        )
     }
 
     companion object {
@@ -86,10 +97,35 @@ interface RaisableIssue : Issue {
     val raisedBy: Person
 }
 
+data class RaisableIssueImpl(
+    override val uuid: UUID,
+    override val id: Long,
+    override val state: String?,
+    override val stateReason: GHIssueStateReason?,
+    override val number: Int,
+    override val closedAt: String?,
+    override val body: String?,
+    override val title: String?,
+    override val htmlUrl: String?,
+    override val locked: Boolean,
+    override val company: String?,
+    override val raisedBy: Person,
+) : RaisableIssue
+
 interface IssueAssignment : Issue {
     //    @GraphRelationship(type = "ASSIGNED_TO", direction = Direction.OUTGOING, targetLabel = "Person", alias = "p")
     val assignedTo: Collection<Person>
 }
+
+data class Profile(
+    override val uuid: UUID = UUID.randomUUID(),
+    val retrieved: Instant = Instant.now(),
+    val bio: String,
+    val homepage: String?,
+    val location: String?,
+    val email: String?,
+    val blog: String?,
+) : HasUUID
 
 
 data class Person(
@@ -98,5 +134,6 @@ data class Person(
     val bio: String?,
     val githubId: Long?,
     val employer: Employer?,
+    val profile: Profile? = null
 ) : HasUUID
 

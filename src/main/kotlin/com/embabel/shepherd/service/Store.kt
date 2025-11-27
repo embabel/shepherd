@@ -22,26 +22,39 @@ class Store(
             }
     }
 
+    data class IssueExpansion(
+        val issue: RaisableIssue,
+        val newPerson: Person?,
+    )
+
     /**
      * Save the issue and its company and person if not already present
      */
     @Transactional
-    fun saveAndExpandIssue(ghIssue: GHIssue): RaisableIssue {
+    fun saveAndExpandIssue(ghIssue: GHIssue): IssueExpansion {
         val issue = Issue.fromGHIssue(ghIssue)
         val saved = mixinTemplate.save(issue)
         val employer = mixinTemplate.findAll(Employer::class.java)
             .find { it.name == ghIssue.user.company }
-        val person = mixinTemplate.findAll(Person::class.java)
-            .find { it.githubId == ghIssue.user.id } ?: Person(
+        val existingPerson = mixinTemplate.findAll(Person::class.java)
+            .find { it.githubId == ghIssue.user.id }
+        val newPerson = if (existingPerson == null) Person(
             uuid = java.util.UUID.randomUUID(),
             name = ghIssue.user.name ?: ghIssue.user.login,
             bio = ghIssue.user.bio ?: "",
             githubId = ghIssue.user.id,
             employer = employer,
-        )
-        val raisableIssue = saved.withRaisedBy(person)
+        ) else null
+        val raisableIssue = saved.withRaisedBy(existingPerson ?: newPerson!!)
         mixinTemplate.save(raisableIssue)
-        return raisableIssue
+        return IssueExpansion(
+            issue = raisableIssue,
+            newPerson = newPerson,
+        )
+    }
+
+    fun <T> save(entity: T): T {
+        return mixinTemplate.save(entity)
     }
 
 }

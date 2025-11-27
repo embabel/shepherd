@@ -17,6 +17,7 @@ package com.embabel.shepherd
 
 import com.embabel.agent.config.annotation.EnableAgents
 import com.embabel.agent.config.annotation.LoggingThemes
+import com.embabel.agent.config.annotation.McpServers
 import com.embabel.shepherd.conf.ShepherdProperties
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -24,7 +25,10 @@ import org.springframework.boot.runApplication
 
 @SpringBootApplication
 @EnableConfigurationProperties(ShepherdProperties::class)
-@EnableAgents(loggingTheme = LoggingThemes.SEVERANCE)
+@EnableAgents(
+    loggingTheme = LoggingThemes.SEVERANCE,
+    mcpServers = [McpServers.DOCKER_DESKTOP],
+)
 class ShepherdApplication
 
 fun main(args: Array<String>) {
