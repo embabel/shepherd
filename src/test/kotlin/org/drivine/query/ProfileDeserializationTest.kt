@@ -22,7 +22,10 @@ class ProfileDeserializationTest {
           "blog": "https://example.com/blog",
           "email": "contact@example.com",
           "homepage": "https://example.com",
-          "location": "San Francisco, CA"
+          "location": "San Francisco, CA",
+          "programmingLanguages": ["Kotlin", "Java"],
+          "frameworks": ["Spring", "Ktor"],
+          "importance": 0.75
         }
         """.trimIndent()
 
@@ -34,6 +37,9 @@ class ProfileDeserializationTest {
         assertEquals("contact@example.com", profile.email)
         assertEquals("https://example.com", profile.homepage)
         assertEquals("San Francisco, CA", profile.location)
+        assertEquals(setOf("Kotlin", "Java"), profile.programmingLanguages)
+        assertEquals(setOf("Spring", "Ktor"), profile.frameworks)
+        assertEquals(0.75, profile.importance)
         assertNotNull(profile.uuid) // Should be auto-generated
         assertNotNull(profile.retrieved) // Should use default value
     }
@@ -47,7 +53,10 @@ class ProfileDeserializationTest {
           "blog": "https://example.com/blog",
           "email": "contact@example.com",
           "homepage": "https://example.com",
-          "location": "San Francisco, CA"
+          "location": "San Francisco, CA",
+          "programmingLanguages": ["Python"],
+          "frameworks": ["Django"],
+          "importance": 0.9
         }
         """.trimIndent()
 
@@ -58,6 +67,9 @@ class ProfileDeserializationTest {
         assertEquals("contact@example.com", profile.email)
         assertEquals("https://example.com", profile.homepage)
         assertEquals("San Francisco, CA", profile.location)
+        assertEquals(setOf("Python"), profile.programmingLanguages)
+        assertEquals(setOf("Django"), profile.frameworks)
+        assertEquals(0.9, profile.importance)
         assertNotNull(profile.uuid)
         assertNotNull(profile.retrieved) // Should use default value
     }

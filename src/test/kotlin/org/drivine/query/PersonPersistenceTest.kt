@@ -176,18 +176,16 @@ class PersonPersistenceTest {
     }
 
     @Test
-    fun `should find IssueImpl when querying by Issue interface`() {
-        val issue = IssueImpl(
-            uuid = UUID.randomUUID(),
+    fun `should find Issue when querying by Issue interface`() {
+        val issueUuid = UUID.randomUUID()
+        val issue = Issue.create(
+            uuid = issueUuid,
             id = 12345L,
             state = "open",
-            stateReason = null,
             number = 42,
-            closedAt = null,
             body = "This is a bug",
             title = "Bug report",
             htmlUrl = "https://github.com/test/repo/issues/42",
-            locked = false,
             company = "Acme"
         )
 
@@ -202,7 +200,7 @@ class PersonPersistenceTest {
         assertEquals(1, allIssues.size)
 
         val retrieved = allIssues[0]
-        assertEquals(issue.uuid, retrieved.uuid)
+        assertEquals(issueUuid, retrieved.uuid)
         assertEquals(issue.id, retrieved.id)
         assertEquals(issue.title, retrieved.title)
         assertEquals(issue.body, retrieved.body)
@@ -222,18 +220,17 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Acme"
         )
-        val issue = IssueImpl(
-            uuid = UUID.randomUUID(),
+        val issueUuid = UUID.randomUUID()
+        val issue = Issue.create(
+            uuid = issueUuid,
             id = 999L,
             state = "closed",
-            stateReason = null,
             number = 1,
             closedAt = "2024-01-01",
             body = "Fixed",
             title = "Done",
             htmlUrl = "https://example.com",
-            locked = true,
-            company = null
+            locked = true
         )
 
         template.save(person)
@@ -247,7 +244,7 @@ class PersonPersistenceTest {
         val uuids = allWithUuid.map { it.uuid }.toSet()
         assertTrue(uuids.contains(person.uuid))
         assertTrue(uuids.contains(org.uuid))
-        assertTrue(uuids.contains(issue.uuid))
+        assertTrue(uuids.contains(issueUuid))
     }
 
     @Test
@@ -260,17 +257,15 @@ class PersonPersistenceTest {
             employer = null
         )
 
-        val issue = IssueImpl(
-            uuid = UUID.randomUUID(),
+        val issueUuid = UUID.randomUUID()
+        val issue = Issue.create(
+            uuid = issueUuid,
             id = 54321L,
             state = "open",
-            stateReason = null,
             number = 100,
-            closedAt = null,
             body = "Found a bug",
             title = "Bug in login",
             htmlUrl = "https://github.com/test/repo/issues/100",
-            locked = false,
             company = "TestCorp"
         )
 
@@ -285,7 +280,7 @@ class PersonPersistenceTest {
         assertEquals(1, allRaisable.size)
 
         val retrieved = allRaisable[0]
-        assertEquals(issue.uuid, retrieved.uuid)
+        assertEquals(issueUuid, retrieved.uuid)
         assertEquals(issue.id, retrieved.id)
         assertEquals(issue.title, retrieved.title)
         assertEquals(person.uuid, retrieved.raisedBy.uuid)
@@ -299,7 +294,10 @@ class PersonPersistenceTest {
             homepage = "https://example.com",
             location = "New York",
             email = "dev@example.com",
-            blog = "https://example.com/blog"
+            blog = "https://example.com/blog",
+            programmingLanguages = setOf("Kotlin", "Java"),
+            frameworks = setOf("Spring"),
+            importance = 0.8
         )
 
         val person = Person(
@@ -311,18 +309,15 @@ class PersonPersistenceTest {
             profile = profile
         )
 
-        val issue = IssueImpl(
-            uuid = UUID.randomUUID(),
+        val issueUuid = UUID.randomUUID()
+        val issue = Issue.create(
+            uuid = issueUuid,
             id = 11111L,
             state = "open",
-            stateReason = null,
             number = 200,
-            closedAt = null,
             body = "Feature request",
             title = "Add dark mode",
-            htmlUrl = "https://github.com/test/repo/issues/200",
-            locked = false,
-            company = null
+            htmlUrl = "https://github.com/test/repo/issues/200"
         )
 
         // Create RaisableIssue with Person that has a Profile
@@ -358,18 +353,15 @@ class PersonPersistenceTest {
             profile = null
         )
 
-        val issue = IssueImpl(
-            uuid = UUID.randomUUID(),
+        val issueUuid = UUID.randomUUID()
+        val issue = Issue.create(
+            uuid = issueUuid,
             id = 22222L,
             state = "open",
-            stateReason = null,
             number = 300,
-            closedAt = null,
             body = "Bug",
             title = "Fix crash",
-            htmlUrl = "https://github.com/test/repo/issues/300",
-            locked = false,
-            company = null
+            htmlUrl = "https://github.com/test/repo/issues/300"
         )
 
         // Save RaisableIssue with Person WITHOUT profile
@@ -382,7 +374,10 @@ class PersonPersistenceTest {
             homepage = "https://updated.com",
             location = "Updated location",
             email = "updated@example.com",
-            blog = null
+            blog = null,
+            programmingLanguages = setOf("Python"),
+            frameworks = setOf("Django"),
+            importance = 0.5
         )
         val personWithProfile = personWithoutProfile.copy(profile = profile)
         template.save(personWithProfile)

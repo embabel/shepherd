@@ -102,6 +102,7 @@ class IssueActions(
             .withTools(CoreToolGroups.WEB)
             .withoutProperties("uuid", "retrieved")
             .creating(Profile::class.java)
+            // withoutProperties goes here
             .fromTemplate("research_person", mapOf("person" to person))
         logger.info(
             "Researched person raising issue #{}: name='{}', profile='{}'",
@@ -109,6 +110,9 @@ class IssueActions(
             person.name,
             profile,
         )
+
+        // What about their github repos
+
         return store.save(person.copy(profile = profile))
     }
 

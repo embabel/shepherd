@@ -1,5 +1,7 @@
 package com.embabel.shepherd.domain
 
+import com.embabel.common.core.types.ZeroToOne
+import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHIssueStateReason
 import java.time.Instant
@@ -37,20 +39,10 @@ interface Issue : HasUUID {
     val company: String?
 
     fun withRaisedBy(person: Person): RaisableIssue {
-        return RaisableIssueImpl(
-            uuid = this.uuid,
-            id = this.id,
-            state = this.state,
-            stateReason = this.stateReason,
-            number = this.number,
-            closedAt = this.closedAt,
-            body = this.body,
-            title = this.title,
-            htmlUrl = this.htmlUrl,
-            locked = this.locked,
-            company = this.company,
-            raisedBy = person,
-        )
+        val self = this
+        return object : RaisableIssue, Issue by self {
+            override val raisedBy: Person = person
+        }
     }
 
     companion object {
@@ -72,10 +64,39 @@ interface Issue : HasUUID {
             )
             return issue
         }
+
+        /**
+         * Create an Issue for testing purposes.
+         */
+        fun create(
+            uuid: UUID = UUID.randomUUID(),
+            id: Long,
+            state: String? = null,
+            stateReason: GHIssueStateReason? = null,
+            number: Int,
+            closedAt: String? = null,
+            body: String? = null,
+            title: String? = null,
+            htmlUrl: String? = null,
+            locked: Boolean = false,
+            company: String? = null,
+        ): Issue = IssueImpl(
+            uuid = uuid,
+            id = id,
+            state = state,
+            stateReason = stateReason,
+            number = number,
+            closedAt = closedAt,
+            body = body,
+            title = title,
+            htmlUrl = htmlUrl,
+            locked = locked,
+            company = company,
+        )
     }
 }
 
-data class IssueImpl(
+internal data class IssueImpl(
     override val uuid: UUID,
     override val id: Long,
     override val state: String?,
@@ -97,20 +118,6 @@ interface RaisableIssue : Issue {
     val raisedBy: Person
 }
 
-data class RaisableIssueImpl(
-    override val uuid: UUID,
-    override val id: Long,
-    override val state: String?,
-    override val stateReason: GHIssueStateReason?,
-    override val number: Int,
-    override val closedAt: String?,
-    override val body: String?,
-    override val title: String?,
-    override val htmlUrl: String?,
-    override val locked: Boolean,
-    override val company: String?,
-    override val raisedBy: Person,
-) : RaisableIssue
 
 interface IssueAssignment : Issue {
     //    @GraphRelationship(type = "ASSIGNED_TO", direction = Direction.OUTGOING, targetLabel = "Person", alias = "p")
@@ -122,9 +129,16 @@ data class Profile(
     val retrieved: Instant = Instant.now(),
     val bio: String,
     val homepage: String?,
+    @param:JsonPropertyDescription("programming languages as generally written, eg Java, Python or C#")
+    val programmingLanguages: Set<String>,
+    @param:JsonPropertyDescription("frameworks as generally written, eg Spring or React")
+    val frameworks: Set<String>,
+    // TODO Should be enum
     val location: String?,
     val email: String?,
     val blog: String?,
+    @param:JsonPropertyDescription("How important this profile is to us, from 0 (not important) to 1 (very important)")
+    val importance: ZeroToOne,
 ) : HasUUID
 
 
