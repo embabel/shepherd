@@ -5,6 +5,8 @@ import org.drivine.connection.DataSourceMap
 import org.drivine.connection.DatabaseType
 import org.drivine.manager.PersistenceManager
 import org.drivine.manager.PersistenceManagerFactory
+import org.drivine.query.FileMixinTemplate
+import org.drivine.query.MixinTemplate
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -46,6 +48,9 @@ class DrivineConfiguration2 {
 //    fun factory(databaseRegistry: DatabaseRegistry): PersistenceManagerFactory {
 //        return PersistenceManagerFactory(databaseRegistry, transactionContextHolder())
 //    }
+
+    @Bean
+    fun mixinTemplate(): MixinTemplate = FileMixinTemplate()
 
     @Bean
 //    @Profile("local & !test")

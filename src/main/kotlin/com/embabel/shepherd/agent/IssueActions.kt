@@ -6,15 +6,16 @@ import com.embabel.agent.api.common.Ai
 import com.embabel.common.core.types.ZeroToOne
 import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Person
-import com.embabel.shepherd.domain.PersonRepository
+import com.embabel.shepherd.domain.RaisableIssue
+import com.embabel.shepherd.service.Store
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
-import com.fasterxml.jackson.databind.ObjectMapper
+import org.drivine.query.MixinTemplate
 import org.kohsuke.github.GHIssue
 import org.slf4j.LoggerFactory
-import java.util.*
 
 data class NewIssue(
     val ghIssue: GHIssue,
+    val issue: RaisableIssue,
 )
 
 data class UpdatedIssue(
@@ -30,23 +31,28 @@ data class FirstResponse(
 )
 
 data class IssueReaction(
-    val ghIssue: GHIssue,
+    val newIssue: NewIssue,
     val firstResponse: FirstResponse,
 )
 
 @EmbabelComponent
 class IssueActions(
     val properties: ShepherdProperties,
-    private val personRepository: PersonRepository,
-    private val jacksonObjectMapper: ObjectMapper,
+    private val store: Store,
+    private val mixinTemplate: MixinTemplate,
 ) {
 
     private val logger = LoggerFactory.getLogger(IssueActions::class.java)
 
     @Action
-    fun publishNewIssue(issue: GHIssue): NewIssue? {
-        // TODO look up whether it's new
-        return NewIssue(ghIssue = issue)
+    fun saveNewIssue(ghIssue: GHIssue): NewIssue? {
+        val existing = store.findIssueByGithubId(ghIssue.id)
+        if (existing == null) {
+            val issue = store.saveAndExpandIssue(ghIssue)
+            return NewIssue(ghIssue, issue)
+        }
+        logger.info("Issue already known: #${ghIssue.number}, title='${ghIssue.title}'")
+        return null
     }
 
     @Action
@@ -55,6 +61,7 @@ class IssueActions(
             "Found new issue to react to: #{}, title='{}'",
             newIssue.ghIssue.number, newIssue.ghIssue.title
         )
+
         val firstResponse = ai
             .withLlm(properties.firstResponderLlm)
             .withId("first_response")
@@ -71,10 +78,8 @@ class IssueActions(
             firstResponse.sentiment,
         )
 
-        personRepository.save(newIssue.ghIssue)
-
         return IssueReaction(
-            ghIssue = newIssue.ghIssue,
+            newIssue = newIssue,
             firstResponse = firstResponse,
         )
     }
@@ -83,15 +88,8 @@ class IssueActions(
      * When we see an issue we check whether or not the person raising it is already known to us.
      */
     @Action
-    fun researchRaiser(issue: GHIssue): Person {
-        val newPerson = Person(
-            uuid = UUID.randomUUID(),
-            name = issue.user.name,
-            bio = issue.user.bio,
-            githubId = issue.user.login,
-        )
-        val savedPerson = personRepository.save(newPerson)
-        return savedPerson
+    fun researchRaiser(newIssue: NewIssue): Person {
+        return newIssue.issue.raisedBy
     }
 
     // TODO note that naming comes from blackboard, not parameter name

@@ -1,4 +1,6 @@
 
+.data
+
 embabel-agent-api/src/main/resources/mcp/**
 
 /target/**
