@@ -8,10 +8,12 @@ import com.embabel.shepherd.community.domain.PullRequest
 import com.embabel.shepherd.community.domain.RaisableIssue
 import com.embabel.shepherd.community.service.IssueReader
 import com.embabel.shepherd.community.service.RepoId
+import com.embabel.shepherd.proprietary.domain.PersonWithProfile
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.drivine.query.FileMixinTemplate
 import org.drivine.query.MixinTemplate
 import org.drivine.query.findAll
+import org.drivine.query.findById
 import org.kohsuke.github.GHIssueState
 import org.springframework.context.annotation.Profile
 import org.springframework.shell.standard.ShellComponent
@@ -59,6 +61,11 @@ class ShepherdShell(
         val issues = mixinTemplate.findAll<RaisableIssue>()
         for (issue in issues) {
             println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(issue))
+            val deep = mixinTemplate.findById<PersonWithProfile>(issue.raisedBy.uuid.toString())
+            println(
+                "Profile: " + objectMapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(deep)
+            )
         }
     }
 

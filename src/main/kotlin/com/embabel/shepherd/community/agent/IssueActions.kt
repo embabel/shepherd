@@ -12,6 +12,7 @@ import com.embabel.shepherd.community.service.DummyGitHubUpdater
 import com.embabel.shepherd.community.service.GitHubUpdater
 import com.embabel.shepherd.community.service.Store
 import com.embabel.shepherd.community.tools.GitHubUserTools
+import com.embabel.shepherd.proprietary.domain.PersonWithProfile
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
@@ -175,7 +176,7 @@ class IssueActions(
 
         // What about their github repos
 
-        store.save(person.withProfile(profile))
+        store.save(PersonWithProfile.from(person, profile))
     }
 
     // TODO note that naming comes from blackboard, not parameter name

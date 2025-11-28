@@ -21,13 +21,6 @@ interface Issue : HasUUID {
     val locked: Boolean
     val company: String?
 
-    fun withRaisedBy(person: Person): RaisableIssue {
-        val self = this
-        return object : RaisableIssue, Issue by self {
-            override val raisedBy: Person = person
-        }
-    }
-
     companion object {
 
         fun fromGHIssue(ghIssue: GHIssue): Issue {
@@ -99,6 +92,17 @@ interface RaisableIssue : Issue {
 
     //    @GraphRelationship(type = "RAISED_BY", direction = Direction.INCOMING, targetLabel = "Person", alias = "p")
     val raisedBy: Person
+
+    companion object {
+        /**
+         * Create a RaisableIssue from an Issue and Person.
+         */
+        fun from(issue: Issue, raisedBy: Person): RaisableIssue {
+            return object : RaisableIssue, Issue by issue {
+                override val raisedBy: Person = raisedBy
+            }
+        }
+    }
 }
 
 

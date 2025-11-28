@@ -77,11 +77,11 @@ class CompositeIdExtractor(
  */
 interface MixinTemplate {
 
-    fun <T> findById(id: Long, mixins: List<Class<out T>>): T?
+    fun <T> findById(id: String, clazz: Class<T>, mixins: List<Class<out T>>): T?
 
-    fun <T> findById(id: Long): T? = findById(id, emptyList())
+    fun <T> findById(id: String, clazz: Class<T>): T? = findById(id, clazz, emptyList())
 
-    fun <T, U : T> findById(id: Long, mixin: Class<U>): U?
+    fun <T, U : T> findById(id: String, clazz: Class<T>, mixin: Class<U>): U?
 
     fun <T> save(entity: T): T
 
@@ -94,7 +94,12 @@ interface MixinTemplate {
 /**
  * Reified extension to find by ID with a specific type.
  */
-inline fun <reified T : Any> MixinTemplate.findByIdAs(id: Long): T? = findById(id, T::class.java)
+inline fun <reified T : Any> MixinTemplate.findByIdAs(id: String): T? = findById(id, T::class.java)
+
+/**
+ * Reified extension to find by ID with a specific type (alternative syntax).
+ */
+inline fun <reified T : Any> MixinTemplate.findById(id: String): T? = findById(id, T::class.java)
 
 /**
  * Reified extension to find all entities of a specific type.

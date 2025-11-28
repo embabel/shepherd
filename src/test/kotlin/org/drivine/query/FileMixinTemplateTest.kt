@@ -37,14 +37,14 @@ class FileMixinTemplateTest {
 
         assertEquals(entity, saved)
 
-        val retrieved = template.findByIdAs<TestEntity>(123L)
+        val retrieved = template.findByIdAs<TestEntity>("123")
         assertNotNull(retrieved)
         assertEquals(entity, retrieved)
     }
 
     @Test
     fun `should return null for non-existent id`() {
-        val result = template.findByIdAs<TestEntity>(999L)
+        val result = template.findByIdAs<TestEntity>("999")
         assertNull(result)
     }
 

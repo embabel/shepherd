@@ -1,6 +1,7 @@
 package org.drivine.query
 
 import com.embabel.shepherd.community.domain.*
+import com.embabel.shepherd.proprietary.domain.PersonWithProfile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -34,8 +35,9 @@ class PersonPersistenceTest {
             uuidExtractor = uuidExtractor,
         )
 
-        // Register the package where domain classes live
+        // Register packages where domain classes live
         template.registerPackage("com.embabel.shepherd.community.domain")
+        template.registerPackage("com.embabel.shepherd.proprietary.domain")
     }
 
     @AfterEach
@@ -280,8 +282,8 @@ class PersonPersistenceTest {
             company = "TestCorp"
         )
 
-        // Create a RaisableIssue using withRaisedBy
-        val raisableIssue = issue.withRaisedBy(person)
+        // Create a RaisableIssue using RaisableIssue.from
+        val raisableIssue = RaisableIssue.from(issue, person)
 
         // Save the raisable issue
         template.save(raisableIssue)
@@ -323,8 +325,8 @@ class PersonPersistenceTest {
             employer = null
         )
 
-        // Create PersonWithProfile using withProfile
-        val personWithProfile = person.withProfile(profile)
+        // Create PersonWithProfile using PersonWithProfile.from
+        val personWithProfile = PersonWithProfile.from(person, profile)
         template.save(personWithProfile)
 
         // Retrieve and verify Profile is intact
@@ -370,7 +372,7 @@ class PersonPersistenceTest {
             importance = 0.5,
             categories = setOf("contributor")
         )
-        val personWithProfile = person.withProfile(profile)
+        val personWithProfile = PersonWithProfile.from(person, profile)
         template.save(personWithProfile)
 
         // Retrieve PersonWithProfile
@@ -383,6 +385,141 @@ class PersonPersistenceTest {
         // Person queried directly should also be found (stored as PersonImpl)
         val allPersons = template.findAll<Person>().toList()
         assertEquals(1, allPersons.size)
+    }
+
+    @Test
+    fun `should save loaded entity back after creating relationship`() {
+        // Save a person first
+        val person = Person.create(
+            uuid = UUID.randomUUID(),
+            name = "Reporter",
+            bio = "Bug hunter",
+            githubId = 111L,
+            employer = null
+        )
+        template.save(person)
+
+        // Save an issue
+        val issue = Issue.create(
+            uuid = UUID.randomUUID(),
+            id = 99999L,
+            state = "open",
+            number = 1,
+            body = "Found a bug",
+            title = "Bug report",
+            htmlUrl = "https://github.com/test/issues/1",
+        )
+        template.save(issue)
+
+        // Load the person back
+        val loadedPersons = template.findAll<Person>().toList()
+        assertEquals(1, loadedPersons.size)
+        val loadedPerson = loadedPersons[0]
+
+        // Load the issue back
+        val loadedIssues = template.findAll<Issue>().toList()
+        assertEquals(1, loadedIssues.size)
+        val loadedIssue = loadedIssues[0]
+
+        // Create a RaisableIssue using the loaded entities
+        val raisableIssue = RaisableIssue.from(loadedIssue, loadedPerson)
+        template.save(raisableIssue)
+
+        // Verify we can load the RaisableIssue with the relationship intact
+        val allRaisable = template.findAll<RaisableIssue>().toList()
+        assertEquals(1, allRaisable.size)
+
+        val retrieved = allRaisable[0]
+        assertEquals(issue.uuid, retrieved.uuid)
+        assertEquals(issue.title, retrieved.title)
+        assertEquals(person.uuid, retrieved.raisedBy.uuid)
+        assertEquals(person.name, retrieved.raisedBy.name)
+    }
+
+    @Test
+    fun `should save PersonWithProfile created from fresh Person - IssueActions scenario`() {
+        // This tests the exact scenario in IssueActions.researchRaiser:
+        // A new Person is created via Person.create(), then a profile is attached
+        // and saved via store.save(PersonWithProfile.from(person, profile))
+
+        val person = Person.create(
+            uuid = UUID.randomUUID(),
+            name = "New Contributor",
+            bio = "Found a bug",
+            githubId = 12345L,
+            employer = null
+        )
+
+        val profile = Profile(
+            bio = "Open source contributor",
+            homepage = "https://github.com/contributor",
+            programmingLanguages = setOf("Java", "Kotlin"),
+            frameworks = setOf("Spring Boot"),
+            importance = 0.7,
+            categories = setOf("contributor")
+        )
+
+        // This is exactly what IssueActions does
+        val personWithProfile = PersonWithProfile.from(person, profile)
+        template.save(personWithProfile)
+
+        // Verify we can find it as PersonWithProfile
+        val allWithProfile = template.findAll<PersonWithProfile>().toList()
+        assertEquals(1, allWithProfile.size)
+
+        val retrieved = allWithProfile[0]
+        assertEquals(person.uuid, retrieved.uuid)
+        assertEquals(person.name, retrieved.name)
+        assertEquals(person.githubId, retrieved.githubId)
+        assertEquals(profile.bio, retrieved.profile.bio)
+        assertEquals(profile.programmingLanguages, retrieved.profile.programmingLanguages)
+        assertEquals(profile.frameworks, retrieved.profile.frameworks)
+        assertEquals(profile.importance, retrieved.profile.importance)
+
+        // Also verify we can find it as Person (base type)
+        val allPersons = template.findAll<Person>().toList()
+        assertEquals(1, allPersons.size)
+    }
+
+    @Test
+    fun `should save loaded entity with new profile attached`() {
+        // Save a person first
+        val person = Person.create(
+            uuid = UUID.randomUUID(),
+            name = "Developer",
+            bio = "Writes code",
+            githubId = 222L,
+            employer = null
+        )
+        template.save(person)
+
+        // Load the person back
+        val loadedPersons = template.findAll<Person>().toList()
+        assertEquals(1, loadedPersons.size)
+        val loadedPerson = loadedPersons[0]
+
+        // Create a profile and attach to loaded person
+        val profile = Profile(
+            bio = "Senior Developer",
+            homepage = "https://example.com",
+            programmingLanguages = setOf("Kotlin", "Java"),
+            frameworks = setOf("Spring"),
+            importance = 0.9,
+            categories = setOf("developer")
+        )
+
+        val personWithProfile = PersonWithProfile.from(loadedPerson, profile)
+        template.save(personWithProfile)
+
+        // Verify PersonWithProfile was saved correctly
+        val allWithProfile = template.findAll<PersonWithProfile>().toList()
+        assertEquals(1, allWithProfile.size)
+
+        val retrieved = allWithProfile[0]
+        assertEquals(person.uuid, retrieved.uuid)
+        assertEquals(person.name, retrieved.name)
+        assertEquals(profile.bio, retrieved.profile.bio)
+        assertEquals(profile.programmingLanguages, retrieved.profile.programmingLanguages)
     }
 
     @Test

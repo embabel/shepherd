@@ -69,8 +69,9 @@ class DrivineConfiguration2 {
             idExtractor = compositeIdExtractor,
             uuidExtractor = uuidExtractor,
         ).apply {
-            // Register the package where domain classes live
+            // Register packages where domain classes live
             registerPackage("com.embabel.shepherd.community.domain")
+            registerPackage("com.embabel.shepherd.proprietary.domain")
         }
     }
 

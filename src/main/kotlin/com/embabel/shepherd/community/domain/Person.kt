@@ -45,17 +45,6 @@ interface Person : HasUUID {
     val githubId: Long?
     val employer: Employer?
 
-    /**
-     * Create a PersonWithProfile by adding profile information to this person.
-     * Uses Kotlin delegation pattern similar to Issue.withRaisedBy.
-     */
-    fun withProfile(profile: Profile): PersonWithProfile {
-        val self = this
-        return object : PersonWithProfile, Person by self {
-            override val profile: Profile = profile
-        }
-    }
-
     companion object {
         /**
          * Create a Person instance.
@@ -84,10 +73,3 @@ internal data class PersonImpl(
     override val employer: Employer?,
 ) : Person
 
-/**
- * A Person with profile information attached.
- * This is a mixin interface that adds profile to Person using delegation.
- */
-interface PersonWithProfile : Person {
-    val profile: Profile
-}

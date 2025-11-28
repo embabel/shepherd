@@ -52,7 +52,7 @@ class Store(
             githubId = ghIssue.user.id,
             employer = employer,
         ) else null
-        val raisableIssue = saved.withRaisedBy(existingPerson ?: newPerson!!)
+        val raisableIssue = RaisableIssue.from(saved, existingPerson ?: newPerson!!)
         mixinTemplate.save(raisableIssue)
         return IssueStorageResult(
             issue = raisableIssue,
