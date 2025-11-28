@@ -9,7 +9,6 @@ import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Profile
 import com.embabel.shepherd.service.Store
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
-import org.drivine.query.MixinTemplate
 import org.kohsuke.github.GHIssue
 import org.slf4j.LoggerFactory
 
@@ -39,7 +38,6 @@ data class IssueReaction(
 class IssueActions(
     val properties: ShepherdProperties,
     private val store: Store,
-    private val mixinTemplate: MixinTemplate,
 ) {
 
     private val logger = LoggerFactory.getLogger(IssueActions::class.java)
@@ -94,6 +92,11 @@ class IssueActions(
         pre = ["spel:newIssue.issueStorageResult.newPerson != null"]
     )
     fun researchRaiser(newIssue: NewIssue, ai: Ai) {
+        logger.info(
+            "Researching person raising issue #{}: githubId={}",
+            newIssue.ghIssue.number,
+            newIssue.ghIssue.user.id,
+        )
         val person = newIssue.issueStorageResult.newPerson ?: error("Internal error: should have new person")
         val profile = ai
             .withLlm(properties.researcherLlm)

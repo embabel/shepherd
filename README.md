@@ -29,3 +29,13 @@ Environment variables:
 - `OPENAI_API_KEY` API key
 - `GITHUB_PERSONAL_ACCESS_TOKEN:` This is optional, but you will likely be rate limited without it. **Without this set,
   the application may hang as GitHub refuses to respond to the request in a timely manner.**
+
+## Logging
+
+Logging is configured using Logback.
+
+Application-specific logging goes to the console.
+
+Other (framework) logging goes to `logs/shepherd.log`.
+
+> To follow app progress, watch the console. To debug, monitor the log file.

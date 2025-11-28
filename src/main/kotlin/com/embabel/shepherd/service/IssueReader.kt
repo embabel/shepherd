@@ -62,12 +62,16 @@ class IssueReader(
     /**
      * Get the most recently created issues for a specific repository.
      */
-    fun getLastIssues(repoId: RepoId, count: Int = 10): List<GHIssue> {
+    fun getLastIssues(
+        repoId: RepoId,
+        count: Int = 10,
+        state: GHIssueState = GHIssueState.OPEN,
+    ): List<GHIssue> {
         val (owner, repo) = repoId
         return try {
             github.getRepository("$owner/$repo")
                 .queryIssues()
-                .state(GHIssueState.ALL)
+                .state(state)
                 .sort(GHIssueQueryBuilder.Sort.CREATED)
                 .direction(GHDirection.DESC)
                 .list()
