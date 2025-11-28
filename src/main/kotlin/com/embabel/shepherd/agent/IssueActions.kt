@@ -9,13 +9,48 @@ import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Profile
 import com.embabel.shepherd.service.Store
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import org.kohsuke.github.GHIssue
+import org.kohsuke.github.GHPullRequest
 import org.slf4j.LoggerFactory
 
-data class NewIssue(
-    val ghIssue: GHIssue,
-    val issueStorageResult: Store.IssueStorageResult,
+// We need deserialization help for the sealed interface
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.CLASS,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "fqn"
 )
+sealed interface NewItem<I : GHIssue> {
+    val ghIssue: I
+    val issueStorageResult: Store.IssueStorageResult
+
+    companion object {
+        operator fun invoke(
+            ghIssue: GHIssue,
+            issueStorageResult: Store.IssueStorageResult,
+        ): NewItem<out GHIssue> {
+            return if (ghIssue is GHPullRequest) {
+                LoggerFactory.getLogger(NewItem::class.java).info(
+                    "Creating NewPullRequest for PR #{}",
+                    ghIssue.number
+                )
+                NewPullRequest(ghIssue, issueStorageResult)
+            } else {
+                NewIssue(ghIssue, issueStorageResult)
+            }
+        }
+    }
+}
+
+data class NewIssue(
+    override val ghIssue: GHIssue,
+    override val issueStorageResult: Store.IssueStorageResult,
+) : NewItem<GHIssue>
+
+data class NewPullRequest(
+    override val ghIssue: GHPullRequest,
+    override val issueStorageResult: Store.IssueStorageResult,
+) : NewItem<GHPullRequest>
 
 data class UpdatedIssue(
     val ghIssue: GHIssue,
@@ -30,7 +65,7 @@ data class FirstResponse(
 )
 
 data class IssueReaction(
-    val newIssue: NewIssue,
+    val newIssue: NewItem<*>,
     val firstResponse: FirstResponse,
 )
 
@@ -46,13 +81,14 @@ class IssueActions(
      * If issue isn't new, no further actions will fire
      */
     @Action
-    fun saveNewIssue(ghIssue: GHIssue): NewIssue? {
+    fun saveNewIssue(ghIssue: GHIssue): NewItem<*>? {
         val existing = store.findIssueByGithubId(ghIssue.id)
         if (existing == null) {
             val issueExpansion = store.saveAndExpandIssue(ghIssue)
-            return NewIssue(ghIssue, issueExpansion)
+            logger.info("New issue found: #{}, title='{}'", ghIssue.number, ghIssue.title)
+            return NewItem(ghIssue, issueExpansion)
         }
-        logger.info("Issue already known: #${ghIssue.number}, title='${ghIssue.title}'")
+        logger.info("Issue already known: #{}, title='{}'", ghIssue.number, ghIssue.title)
         return null
     }
 
@@ -65,10 +101,10 @@ class IssueActions(
 
         val firstResponse = ai
             .withLlm(properties.firstResponderLlm)
-            .withId("first_response")
+            .withId("issue_response")
             .creating(FirstResponse::class.java)
             .fromTemplate(
-                "first_response",
+                "first_issue_response",
                 mapOf("issue" to newIssue.ghIssue),
             )
         logger.info(
@@ -85,13 +121,42 @@ class IssueActions(
         )
     }
 
+    @Action
+    fun reactToNewPr(newPr: NewPullRequest, ai: Ai): IssueReaction {
+        logger.info(
+            "Found new PR to react to: #{}, title='{}'",
+            newPr.ghIssue.number, newPr.ghIssue.title
+        )
+
+        val firstResponse = ai
+            .withLlm(properties.firstResponderLlm)
+            .withId("pr_response")
+            .creating(FirstResponse::class.java)
+            .fromTemplate(
+                "first_pr_response",
+                mapOf("pr" to newPr.ghIssue),
+            )
+        logger.info(
+            "Generated first response for PR #{}: comment='{}', urgency={}, sentiment={}",
+            newPr.ghIssue.number,
+            firstResponse.comment,
+            firstResponse.urgency,
+            firstResponse.sentiment,
+        )
+
+        return IssueReaction(
+            newIssue = newPr,
+            firstResponse = firstResponse,
+        )
+    }
+
     /**
      * The person raising this issue isn't already known to us.
      */
     @Action(
         pre = ["spel:newIssue.issueStorageResult.newPerson != null"]
     )
-    fun researchRaiser(newIssue: NewIssue, ai: Ai) {
+    fun researchRaiser(newIssue: NewItem<*>, ai: Ai) {
         logger.info(
             "Researching person raising issue #{}: githubId={}",
             newIssue.ghIssue.number,
@@ -102,9 +167,8 @@ class IssueActions(
             .withLlm(properties.researcherLlm)
             .withId("person_research")
             .withTools(CoreToolGroups.WEB)
-            .withoutProperties("uuid", "retrieved")
+            .withoutProperties("uuid", "updated")
             .creating(Profile::class.java)
-            // withoutProperties goes here
             .fromTemplate(
                 "research_person",
                 mapOf("person" to person, "properties" to properties)
@@ -125,7 +189,7 @@ class IssueActions(
     @Action(
         pre = ["spel:issueReaction.firstResponse.urgency > 0.0"]
     )
-    fun heavyHitter(issue: GHIssue, reaction: IssueReaction) {
-        println("Taking heavy hitter action on issue #${issue.number}")
+    fun heavyHitter(issue: GHIssue, issueReaction: IssueReaction) {
+        logger.info("Taking heavy hitter action on issue #{}", issue.number)
     }
 }

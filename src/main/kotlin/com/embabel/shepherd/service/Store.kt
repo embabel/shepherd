@@ -1,11 +1,9 @@
 package com.embabel.shepherd.service
 
-import com.embabel.shepherd.domain.Employer
-import com.embabel.shepherd.domain.Issue
-import com.embabel.shepherd.domain.Person
-import com.embabel.shepherd.domain.RaisableIssue
+import com.embabel.shepherd.domain.*
 import org.drivine.query.MixinTemplate
 import org.kohsuke.github.GHIssue
+import org.kohsuke.github.GHPullRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -36,7 +34,11 @@ class Store(
      */
     @Transactional
     fun saveAndExpandIssue(ghIssue: GHIssue): IssueStorageResult {
-        val issue = Issue.fromGHIssue(ghIssue)
+        val issue = if (ghIssue is GHPullRequest) {
+            PullRequest.fromGHPullRequest(ghIssue)
+        } else {
+            Issue.fromGHIssue(ghIssue)
+        }
         val saved = mixinTemplate.save(issue)
         val employer = mixinTemplate.findAll(Employer::class.java)
             .find { it.name == ghIssue.user.company }

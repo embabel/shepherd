@@ -65,7 +65,7 @@ class IssueReader(
     fun getLastIssues(
         repoId: RepoId,
         count: Int = 10,
-        state: GHIssueState = GHIssueState.OPEN,
+        state: GHIssueState,
     ): List<GHIssue> {
         val (owner, repo) = repoId
         return try {

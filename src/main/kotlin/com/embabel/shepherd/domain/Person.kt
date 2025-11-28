@@ -11,20 +11,25 @@ data class Employer(
     val name: String,
 ) : HasUUID
 
-
+/**
+ * Information we've retrieved about a person's profile
+ * Some of this is subjective, some from general sources
+ */
 data class Profile(
     override val uuid: UUID = UUID.randomUUID(),
-    val retrieved: Instant = Instant.now(),
+    @param:JsonPropertyDescription("when this profile was updated")
+    val updated: Instant = Instant.now(),
     val bio: String,
     val homepage: String?,
     @param:JsonPropertyDescription("programming languages as generally written, eg Java, Python or C#")
     val programmingLanguages: Set<String>,
     @param:JsonPropertyDescription("frameworks as generally written, eg Spring or React")
     val frameworks: Set<String>,
-    // TODO Should be enum
     val location: String?,
     val email: String?,
     val blog: String?,
+    val linkedInId: String?,
+    val twitterHandle: String?,
     @param:JsonPropertyDescription("How important this profile is to us, from 0 (not important) to 1 (very important)")
     val importance: ZeroToOne,
     @param:JsonPropertyDescription("categorization of the person, any of set of values that applies")

@@ -4,6 +4,7 @@ import com.embabel.agent.api.invocation.UtilityInvocation
 import com.embabel.agent.core.AgentPlatform
 import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Person
+import com.embabel.shepherd.domain.PullRequest
 import com.embabel.shepherd.domain.RaisableIssue
 import com.embabel.shepherd.service.IssueReader
 import com.embabel.shepherd.service.RepoId
@@ -11,9 +12,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.drivine.query.FileMixinTemplate
 import org.drivine.query.MixinTemplate
 import org.drivine.query.findAll
+import org.kohsuke.github.GHIssueState
 import org.springframework.context.annotation.Profile
 import org.springframework.shell.standard.ShellComponent
 import org.springframework.shell.standard.ShellMethod
+import org.springframework.shell.standard.ShellOption
 
 @Profile("!test")
 @ShellComponent
@@ -26,11 +29,13 @@ class ShepherdShell(
 ) {
 
     @ShellMethod("run")
-    fun run() {
+    fun run(
+        @ShellOption(defaultValue = "5", help = "How many issues to get") count: Int,
+    ) {
         val repos = properties.repositoriesToMonitor
             .map { RepoId.fromUrl(it) }
         for (repo in repos) {
-            val issues = issueReader.getLastIssues(repo, 1)
+            val issues = issueReader.getLastIssues(repo, count, GHIssueState.OPEN)
             for (issue in issues) {
                 UtilityInvocation.on(agentPlatform)
                     .terminateWhenStuck()
@@ -53,6 +58,14 @@ class ShepherdShell(
     fun issues() {
         val issues = mixinTemplate.findAll<RaisableIssue>()
         for (issue in issues) {
+            println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(issue))
+        }
+    }
+
+    @ShellMethod
+    fun prs() {
+        val prs = mixinTemplate.findAll<PullRequest>()
+        for (issue in prs) {
             println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(issue))
         }
     }

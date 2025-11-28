@@ -1,6 +1,7 @@
 package org.drivine.query
 
 import com.embabel.shepherd.domain.*
+import org.kohsuke.github.GHIssueStateReason
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -397,5 +398,233 @@ class PersonPersistenceTest {
         val allPersons = template.findAll<Person>().toList()
         assertEquals(1, allPersons.size)
         assertNotNull(allPersons[0].profile, "Directly saved Person should have profile")
+    }
+
+    @Test
+    fun `should persist and retrieve PullRequest with all PR-specific fields`() {
+        val prUuid = UUID.randomUUID()
+        val pr = PullRequest.create(
+            uuid = prUuid,
+            id = 99999L,
+            state = "open",
+            stateReason = null,
+            number = 42,
+            closedAt = null,
+            body = "This PR adds a new feature",
+            title = "Add new feature",
+            htmlUrl = "https://github.com/test/repo/pull/42",
+            locked = false,
+            company = "TestCorp",
+            additions = 150,
+            deletions = 30,
+            changedFiles = 5,
+            commits = 3,
+            merged = false,
+            mergeable = true,
+            mergeableState = "clean",
+            mergeCommitSha = null,
+            mergedAt = null,
+            draft = false,
+            diffUrl = "https://github.com/test/repo/pull/42.diff",
+            patchUrl = "https://github.com/test/repo/pull/42.patch",
+            baseBranch = "main",
+            headBranch = "feature/new-feature",
+            baseRepo = "test/repo",
+            headRepo = "contributor/repo",
+        )
+
+        template.save(pr)
+
+        // Verify it's saved under PullRequestImpl directory
+        val implIds = template.listIds("PullRequestImpl")
+        assertEquals(1, implIds.size)
+
+        // Query by PullRequest interface - should find the PullRequestImpl
+        val allPrs = template.findAll<PullRequest>().toList()
+        assertEquals(1, allPrs.size)
+
+        val retrieved = allPrs[0]
+        assertEquals(prUuid, retrieved.uuid)
+        assertEquals(pr.id, retrieved.id)
+        assertEquals(pr.title, retrieved.title)
+        assertEquals(pr.body, retrieved.body)
+        assertEquals(pr.number, retrieved.number)
+
+        // Verify PR-specific fields
+        assertEquals(150, retrieved.additions)
+        assertEquals(30, retrieved.deletions)
+        assertEquals(5, retrieved.changedFiles)
+        assertEquals(3, retrieved.commits)
+        assertEquals(false, retrieved.merged)
+        assertEquals(true, retrieved.mergeable)
+        assertEquals("clean", retrieved.mergeableState)
+        assertEquals(false, retrieved.draft)
+        assertEquals("https://github.com/test/repo/pull/42.diff", retrieved.diffUrl)
+        assertEquals("https://github.com/test/repo/pull/42.patch", retrieved.patchUrl)
+        assertEquals("main", retrieved.baseBranch)
+        assertEquals("feature/new-feature", retrieved.headBranch)
+        assertEquals("test/repo", retrieved.baseRepo)
+        assertEquals("contributor/repo", retrieved.headRepo)
+    }
+
+    @Test
+    fun `should find PullRequest when querying by Issue interface`() {
+        val prUuid = UUID.randomUUID()
+        val pr = PullRequest.create(
+            uuid = prUuid,
+            id = 88888L,
+            state = "closed",
+            number = 100,
+            body = "Bug fix PR",
+            title = "Fix critical bug",
+            htmlUrl = "https://github.com/test/repo/pull/100",
+            additions = 10,
+            deletions = 5,
+            changedFiles = 2,
+            commits = 1,
+            merged = true,
+            mergedAt = "2024-01-15T10:30:00Z",
+            mergeCommitSha = "abc123def456",
+            baseBranch = "main",
+            headBranch = "fix/critical-bug",
+        )
+
+        template.save(pr)
+
+        // Query by Issue interface - should also find the PullRequest
+        val allIssues = template.findAll<Issue>().toList()
+        assertEquals(1, allIssues.size)
+
+        val retrieved = allIssues[0]
+        assertEquals(prUuid, retrieved.uuid)
+        assertEquals(pr.id, retrieved.id)
+        assertEquals(pr.title, retrieved.title)
+
+        // Verify it's actually a PullRequest
+        assertTrue(retrieved is PullRequest)
+        val retrievedPr = retrieved as PullRequest
+        assertEquals(true, retrievedPr.merged)
+        assertEquals("abc123def456", retrievedPr.mergeCommitSha)
+    }
+
+    @Test
+    fun `should persist merged PullRequest with merge details`() {
+        val prUuid = UUID.randomUUID()
+        val pr = PullRequest.create(
+            uuid = prUuid,
+            id = 77777L,
+            state = "closed",
+            stateReason = GHIssueStateReason.COMPLETED,
+            number = 200,
+            closedAt = "2024-02-01T14:00:00Z",
+            body = "Merged feature",
+            title = "Feature complete",
+            htmlUrl = "https://github.com/test/repo/pull/200",
+            additions = 500,
+            deletions = 100,
+            changedFiles = 20,
+            commits = 10,
+            merged = true,
+            mergeable = null,
+            mergeableState = null,
+            mergeCommitSha = "deadbeef1234567890",
+            mergedAt = "2024-02-01T14:00:00Z",
+            draft = false,
+            baseBranch = "main",
+            headBranch = "feature/big-feature",
+            baseRepo = "org/repo",
+            headRepo = "org/repo",
+        )
+
+        template.save(pr)
+
+        val allPrs = template.findAll<PullRequest>().toList()
+        assertEquals(1, allPrs.size)
+
+        val retrieved = allPrs[0]
+        assertEquals(true, retrieved.merged)
+        assertEquals("deadbeef1234567890", retrieved.mergeCommitSha)
+        assertEquals("2024-02-01T14:00:00Z", retrieved.mergedAt)
+        assertEquals("2024-02-01T14:00:00Z", retrieved.closedAt)
+        assertEquals(GHIssueStateReason.COMPLETED, retrieved.stateReason)
+    }
+
+    @Test
+    fun `should persist draft PullRequest`() {
+        val prUuid = UUID.randomUUID()
+        val pr = PullRequest.create(
+            uuid = prUuid,
+            id = 66666L,
+            state = "open",
+            number = 300,
+            body = "WIP: Working on this",
+            title = "[WIP] Draft feature",
+            htmlUrl = "https://github.com/test/repo/pull/300",
+            additions = 50,
+            deletions = 0,
+            changedFiles = 3,
+            commits = 2,
+            merged = false,
+            mergeable = false,
+            mergeableState = "draft",
+            draft = true,
+            baseBranch = "develop",
+            headBranch = "feature/wip",
+        )
+
+        template.save(pr)
+
+        val allPrs = template.findAll<PullRequest>().toList()
+        assertEquals(1, allPrs.size)
+
+        val retrieved = allPrs[0]
+        assertEquals(true, retrieved.draft)
+        assertEquals(false, retrieved.mergeable)
+        assertEquals("draft", retrieved.mergeableState)
+    }
+
+    @Test
+    fun `should find both Issue and PullRequest when querying HasUUID`() {
+        val issue = Issue.create(
+            uuid = UUID.randomUUID(),
+            id = 11111L,
+            state = "open",
+            number = 1,
+            body = "Regular issue",
+            title = "Bug report",
+            htmlUrl = "https://github.com/test/repo/issues/1",
+        )
+
+        val pr = PullRequest.create(
+            uuid = UUID.randomUUID(),
+            id = 22222L,
+            state = "open",
+            number = 2,
+            body = "PR body",
+            title = "Feature PR",
+            htmlUrl = "https://github.com/test/repo/pull/2",
+            additions = 100,
+            deletions = 50,
+            changedFiles = 10,
+            commits = 5,
+            baseBranch = "main",
+            headBranch = "feature",
+        )
+
+        template.save(issue)
+        template.save(pr)
+
+        // Query by HasUUID - should find both
+        val allWithUuid = template.findAll<HasUUID>().toList()
+        assertEquals(2, allWithUuid.size)
+
+        // Query by Issue - should find both (PullRequest extends Issue)
+        val allIssues = template.findAll<Issue>().toList()
+        assertEquals(2, allIssues.size)
+
+        // Query by PullRequest - should find only the PR
+        val allPrs = template.findAll<PullRequest>().toList()
+        assertEquals(1, allPrs.size)
+        assertEquals(pr.uuid, allPrs[0].uuid)
     }
 }
