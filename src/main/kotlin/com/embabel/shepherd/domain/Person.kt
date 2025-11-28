@@ -27,8 +27,9 @@ data class Profile(
     val blog: String?,
     @param:JsonPropertyDescription("How important this profile is to us, from 0 (not important) to 1 (very important)")
     val importance: ZeroToOne,
+    @param:JsonPropertyDescription("categorization of the person, any of set of values that applies")
+    val categories: Set<String>,
 ) : HasUUID
-
 
 data class Person(
     override val uuid: UUID,

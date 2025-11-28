@@ -5,6 +5,13 @@ shepherd:
     temperature: 0.3
   researcher-llm:
     model: gpt-4.1-mini
+  profile-categories:
+    - friend
+    - competitor
+    - contributor
+
+  repositories-to-monitor:
+    - https://github.com/embabel/embabel-agent
 
 
 database:

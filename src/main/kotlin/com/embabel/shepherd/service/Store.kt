@@ -22,7 +22,11 @@ class Store(
             }
     }
 
-    data class IssueExpansion(
+    /**
+     * The issue and any new subgraph elements we saved
+     * when we stored it
+     */
+    data class IssueStorageResult(
         val issue: RaisableIssue,
         val newPerson: Person?,
     )
@@ -31,7 +35,7 @@ class Store(
      * Save the issue and its company and person if not already present
      */
     @Transactional
-    fun saveAndExpandIssue(ghIssue: GHIssue): IssueExpansion {
+    fun saveAndExpandIssue(ghIssue: GHIssue): IssueStorageResult {
         val issue = Issue.fromGHIssue(ghIssue)
         val saved = mixinTemplate.save(issue)
         val employer = mixinTemplate.findAll(Employer::class.java)
@@ -47,7 +51,7 @@ class Store(
         ) else null
         val raisableIssue = saved.withRaisedBy(existingPerson ?: newPerson!!)
         mixinTemplate.save(raisableIssue)
-        return IssueExpansion(
+        return IssueStorageResult(
             issue = raisableIssue,
             newPerson = newPerson,
         )

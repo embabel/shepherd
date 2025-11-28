@@ -25,7 +25,8 @@ class ProfileDeserializationTest {
           "location": "San Francisco, CA",
           "programmingLanguages": ["Kotlin", "Java"],
           "frameworks": ["Spring", "Ktor"],
-          "importance": 0.75
+          "importance": 0.75,
+          "categories": ["developer", "contributor"]
         }
         """.trimIndent()
 
@@ -56,7 +57,8 @@ class ProfileDeserializationTest {
           "location": "San Francisco, CA",
           "programmingLanguages": ["Python"],
           "frameworks": ["Django"],
-          "importance": 0.9
+          "importance": 0.9,
+          "categories": ["maintainer"]
         }
         """.trimIndent()
 

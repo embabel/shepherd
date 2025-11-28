@@ -2,9 +2,11 @@ package com.embabel.shepherd
 
 import com.embabel.agent.api.invocation.UtilityInvocation
 import com.embabel.agent.core.AgentPlatform
+import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Person
 import com.embabel.shepherd.domain.RaisableIssue
 import com.embabel.shepherd.service.IssueReader
+import com.embabel.shepherd.service.RepoId
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.drivine.query.FileMixinTemplate
 import org.drivine.query.MixinTemplate
@@ -19,16 +21,25 @@ class ShepherdShell(
     private val agentPlatform: AgentPlatform,
     private val issueReader: IssueReader,
     private val mixinTemplate: MixinTemplate,
+    private val properties: ShepherdProperties,
     private val objectMapper: ObjectMapper,
 ) {
 
     @ShellMethod("run")
     fun run() {
-        val lastIssue = issueReader.getMyRecentIssues(200, 1).single()
-        UtilityInvocation.on(agentPlatform)
-            .terminateWhenStuck()
-            .run(lastIssue)
+        val repos = properties.repositoriesToMonitor
+            .map { RepoId.fromUrl(it) }
+        for (repo in repos) {
+            val issues = issueReader.getLastIssues(repo, 1)
+            for (issue in issues) {
+                UtilityInvocation.on(agentPlatform)
+                    .terminateWhenStuck()
+                    .run(issue)
+            }
+
+        }
     }
+
 
     @ShellMethod(value = "people")
     fun people() {

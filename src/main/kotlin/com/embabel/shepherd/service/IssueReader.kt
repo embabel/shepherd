@@ -1,13 +1,37 @@
 package com.embabel.shepherd.service
 
-import org.kohsuke.github.GHDirection
-import org.kohsuke.github.GHIssue
-import org.kohsuke.github.GHIssueSearchBuilder
-import org.kohsuke.github.GitHub
+import org.kohsuke.github.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
+data class RepoId(
+    val owner: String,
+    val repo: String,
+) {
+    companion object {
+        private val GITHUB_URL_REGEX = Regex("github\\.com/([^/]+)/([^/]+)")
+
+        /**
+         * Parse a GitHub URL into a RepoId.
+         * Supports URLs like "https://github.com/owner/repo" or "https://github.com/owner/repo.git"
+         * @return RepoId if the URL is valid, null otherwise
+         */
+        fun fromUrl(url: String): RepoId {
+            return GITHUB_URL_REGEX.find(url)?.let { match ->
+                RepoId(
+                    owner = match.groupValues[1],
+                    repo = match.groupValues[2].removeSuffix(".git")
+                )
+            } ?: error("Invalid GitHub URL: $url")
+        }
+    }
+}
+
+
+/**
+ * Service to read issues from GitHub
+ */
 @Service
 class IssueReader(
     private val github: GitHub,
@@ -35,22 +59,23 @@ class IssueReader(
         }
     }
 
-    //    // Search for recently updated issues across all repositories you have access to
-//    fun searchRecentIssues(hoursBack: Int = 24, state: String = "open"): List<GHIssue> {
-//        return try {
-//            val since = LocalDateTime.now().minusHours(hoursBack.toLong())
-//            val sinceString = since.toString() + "Z" // ISO format
-//
-//            github.searchIssues()
-//                .q("updated:>=$sinceString state:$state")
-//                .sort(GHIssueSearchBuilder.Sort.UPDATED)
-//                .order(GHDirection.DESC)
-//                .list()
-//                .take(100) // Limit results
-//                .toList()
-//        } catch (e: Exception) {
-//            println("Error searching recent issues: ${e.message}")
-//            emptyList()
-//        }
-//    }
+    /**
+     * Get the most recently created issues for a specific repository.
+     */
+    fun getLastIssues(repoId: RepoId, count: Int = 10): List<GHIssue> {
+        val (owner, repo) = repoId
+        return try {
+            github.getRepository("$owner/$repo")
+                .queryIssues()
+                .state(GHIssueState.ALL)
+                .sort(GHIssueQueryBuilder.Sort.CREATED)
+                .direction(GHDirection.DESC)
+                .list()
+                .take(count)
+                .toList()
+        } catch (e: Exception) {
+            logger.error("Error fetching last issues for $owner/$repo: ${e.message}")
+            emptyList()
+        }
+    }
 }

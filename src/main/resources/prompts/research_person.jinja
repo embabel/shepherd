@@ -6,6 +6,10 @@ Notes on fields:
 
 - importance (0-1): how important is this person likely to be to the Embabel agent framework?
 Consider the strength of their skills, their employer, Twitter followers etc.
+- categories: set of relevant categories for this person, from the following list:
+{% for category in properties.profileCategories %}
+    - {{ category }}
+{% endfor %}
 
 Here's what we know about them:
 

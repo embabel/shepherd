@@ -6,7 +6,6 @@ import com.embabel.agent.api.common.Ai
 import com.embabel.agent.core.CoreToolGroups
 import com.embabel.common.core.types.ZeroToOne
 import com.embabel.shepherd.conf.ShepherdProperties
-import com.embabel.shepherd.domain.Person
 import com.embabel.shepherd.domain.Profile
 import com.embabel.shepherd.service.Store
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 data class NewIssue(
     val ghIssue: GHIssue,
-    val issueExpansion: Store.IssueExpansion,
+    val issueStorageResult: Store.IssueStorageResult,
 )
 
 data class UpdatedIssue(
@@ -92,10 +91,10 @@ class IssueActions(
      * The person raising this issue isn't already known to us.
      */
     @Action(
-        pre = ["spel:newIssue.issueExpansion.newPerson != null"]
+        pre = ["spel:newIssue.issueStorageResult.newPerson != null"]
     )
-    fun researchRaiser(newIssue: NewIssue, ai: Ai): Person? {
-        val person = newIssue.issueExpansion.newPerson ?: return null
+    fun researchRaiser(newIssue: NewIssue, ai: Ai) {
+        val person = newIssue.issueStorageResult.newPerson ?: error("Internal error: should have new person")
         val profile = ai
             .withLlm(properties.researcherLlm)
             .withId("person_research")
@@ -103,7 +102,10 @@ class IssueActions(
             .withoutProperties("uuid", "retrieved")
             .creating(Profile::class.java)
             // withoutProperties goes here
-            .fromTemplate("research_person", mapOf("person" to person))
+            .fromTemplate(
+                "research_person",
+                mapOf("person" to person, "properties" to properties)
+            )
         logger.info(
             "Researched person raising issue #{}: name='{}', profile='{}'",
             newIssue.ghIssue.number,
@@ -113,7 +115,7 @@ class IssueActions(
 
         // What about their github repos
 
-        return store.save(person.copy(profile = profile))
+        store.save(person.copy(profile = profile))
     }
 
     // TODO note that naming comes from blackboard, not parameter name

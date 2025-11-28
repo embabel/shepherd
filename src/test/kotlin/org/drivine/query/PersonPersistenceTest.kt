@@ -297,7 +297,8 @@ class PersonPersistenceTest {
             blog = "https://example.com/blog",
             programmingLanguages = setOf("Kotlin", "Java"),
             frameworks = setOf("Spring"),
-            importance = 0.8
+            importance = 0.8,
+            categories = setOf("developer")
         )
 
         val person = Person(
@@ -377,7 +378,8 @@ class PersonPersistenceTest {
             blog = null,
             programmingLanguages = setOf("Python"),
             frameworks = setOf("Django"),
-            importance = 0.5
+            importance = 0.5,
+            categories = setOf("contributor")
         )
         val personWithProfile = personWithoutProfile.copy(profile = profile)
         template.save(personWithProfile)
