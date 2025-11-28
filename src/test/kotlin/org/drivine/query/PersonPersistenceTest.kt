@@ -293,9 +293,12 @@ class PersonPersistenceTest {
         val profile = Profile(
             bio = "Senior Developer",
             homepage = "https://example.com",
-            location = "New York",
+            countryCode = "US",
+            region = "New York",
             email = "dev@example.com",
             blog = "https://example.com/blog",
+            linkedInId = "senior-dev",
+            twitterHandle = "seniordev",
             programmingLanguages = setOf("Kotlin", "Java"),
             frameworks = setOf("Spring"),
             importance = 0.8,
@@ -338,7 +341,8 @@ class PersonPersistenceTest {
         assertNotNull(retrieved.raisedBy.profile)
         assertEquals(profile.bio, retrieved.raisedBy.profile!!.bio)
         assertEquals(profile.homepage, retrieved.raisedBy.profile!!.homepage)
-        assertEquals(profile.location, retrieved.raisedBy.profile!!.location)
+        assertEquals(profile.countryCode, retrieved.raisedBy.profile!!.countryCode)
+        assertEquals(profile.region, retrieved.raisedBy.profile!!.region)
         assertEquals(profile.email, retrieved.raisedBy.profile!!.email)
         assertEquals(profile.blog, retrieved.raisedBy.profile!!.blog)
     }
@@ -374,9 +378,12 @@ class PersonPersistenceTest {
         val profile = Profile(
             bio = "Updated bio",
             homepage = "https://updated.com",
-            location = "Updated location",
+            countryCode = null,
+            region = "Updated location",
             email = "updated@example.com",
             blog = null,
+            linkedInId = null,
+            twitterHandle = null,
             programmingLanguages = setOf("Python"),
             frameworks = setOf("Django"),
             importance = 0.5,

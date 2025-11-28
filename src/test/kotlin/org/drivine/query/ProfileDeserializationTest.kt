@@ -22,7 +22,10 @@ class ProfileDeserializationTest {
           "blog": "https://example.com/blog",
           "email": "contact@example.com",
           "homepage": "https://example.com",
-          "location": "San Francisco, CA",
+          "countryCode": "US",
+          "region": "San Francisco, CA",
+          "linkedInId": "softwareengineer",
+          "twitterHandle": "swengineer",
           "programmingLanguages": ["Kotlin", "Java"],
           "frameworks": ["Spring", "Ktor"],
           "importance": 0.75,
@@ -37,12 +40,12 @@ class ProfileDeserializationTest {
         assertEquals("https://example.com/blog", profile.blog)
         assertEquals("contact@example.com", profile.email)
         assertEquals("https://example.com", profile.homepage)
-        assertEquals("San Francisco, CA", profile.location)
+        assertEquals("San Francisco, CA", profile.region)
         assertEquals(setOf("Kotlin", "Java"), profile.programmingLanguages)
         assertEquals(setOf("Spring", "Ktor"), profile.frameworks)
         assertEquals(0.75, profile.importance)
         assertNotNull(profile.uuid) // Should be auto-generated
-        assertNotNull(profile.retrieved) // Should use default value
+        assertNotNull(profile.updated) // Should use default value
     }
 
     @Test
@@ -54,7 +57,10 @@ class ProfileDeserializationTest {
           "blog": "https://example.com/blog",
           "email": "contact@example.com",
           "homepage": "https://example.com",
-          "location": "San Francisco, CA",
+          "countryCode": null,
+          "region": "San Francisco, CA",
+          "linkedInId": null,
+          "twitterHandle": null,
           "programmingLanguages": ["Python"],
           "frameworks": ["Django"],
           "importance": 0.9,
@@ -68,11 +74,11 @@ class ProfileDeserializationTest {
         assertEquals("https://example.com/blog", profile.blog)
         assertEquals("contact@example.com", profile.email)
         assertEquals("https://example.com", profile.homepage)
-        assertEquals("San Francisco, CA", profile.location)
+        assertEquals("San Francisco, CA", profile.region)
         assertEquals(setOf("Python"), profile.programmingLanguages)
         assertEquals(setOf("Django"), profile.frameworks)
         assertEquals(0.9, profile.importance)
         assertNotNull(profile.uuid)
-        assertNotNull(profile.retrieved) // Should use default value
+        assertNotNull(profile.updated) // Should use default value
     }
 }

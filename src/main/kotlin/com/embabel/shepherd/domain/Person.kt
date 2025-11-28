@@ -25,11 +25,14 @@ data class Profile(
     val programmingLanguages: Set<String>,
     @param:JsonPropertyDescription("frameworks as generally written, eg Spring or React")
     val frameworks: Set<String>,
-    val location: String?,
-    val email: String?,
-    val blog: String?,
-    val linkedInId: String?,
-    val twitterHandle: String?,
+    @param:JsonPropertyDescription("2 digit lowercase country code if known")
+    val countryCode: String? = null,
+    @param:JsonPropertyDescription("region within country if known")
+    val region: String? = null,
+    val email: String? = null,
+    val blog: String? = null,
+    val linkedInId: String? = null,
+    val twitterHandle: String? = null,
     @param:JsonPropertyDescription("How important this profile is to us, from 0 (not important) to 1 (very important)")
     val importance: ZeroToOne,
     @param:JsonPropertyDescription("categorization of the person, any of set of values that applies")
