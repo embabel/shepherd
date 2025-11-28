@@ -8,7 +8,10 @@ import com.embabel.agent.core.CoreToolGroups
 import com.embabel.common.core.types.ZeroToOne
 import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Profile
+import com.embabel.shepherd.service.DummyGitHubUpdater
+import com.embabel.shepherd.service.GitHubUpdater
 import com.embabel.shepherd.service.Store
+import com.embabel.shepherd.tools.GitHubUserTools
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
@@ -27,6 +30,8 @@ data class FirstResponse(
     val urgency: ZeroToOne,
     @field:JsonPropertyDescription("A value between 0 and 1 indicating the sentiment of the person who opened the issue, where 0 is negative and 1 is positive")
     val sentiment: ZeroToOne,
+    @field:JsonPropertyDescription("Labels to apply to the issue")
+    val labels: Set<String>,
 )
 
 
@@ -34,6 +39,7 @@ data class FirstResponse(
 class IssueActions(
     val properties: ShepherdProperties,
     private val store: Store,
+    private val gitHubUpdater: GitHubUpdater = DummyGitHubUpdater,
 ) {
 
     private val logger = LoggerFactory.getLogger(IssueActions::class.java)
@@ -76,7 +82,10 @@ class IssueActions(
             .creating(FirstResponse::class.java)
             .fromTemplate(
                 "first_issue_response",
-                mapOf("issue" to ghIssue),
+                mapOf(
+                    "issue" to ghIssue,
+                    "properties" to properties,
+                ),
             )
         logger.info(
             "Generated first response for issue #{}: comment='{}', urgency={}, sentiment={}",
@@ -84,6 +93,11 @@ class IssueActions(
             firstResponse.comment,
             firstResponse.urgency,
             firstResponse.sentiment,
+        )
+
+        gitHubUpdater.labelIssue(
+            ghIssue,
+            firstResponse.labels
         )
 
         return firstResponse
@@ -142,11 +156,15 @@ class IssueActions(
             .withLlm(properties.researcherLlm)
             .withId("person_research")
             .withTools(CoreToolGroups.WEB)
+            .withToolObject(GitHubUserTools(ghIssue.user))
             .withoutProperties("uuid", "updated")
             .creating(Profile::class.java)
             .fromTemplate(
                 "research_person",
-                mapOf("person" to person, "properties" to properties)
+                mapOf(
+                    "person" to person,
+                    "properties" to properties,
+                ),
             )
         logger.info(
             "Researched person raising issue #{}: name='{}', profile='{}'",

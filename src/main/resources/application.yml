@@ -10,8 +10,15 @@ shepherd:
     - competitor
     - contributor
 
+  
+  
   repositories-to-monitor:
     - https://github.com/embabel/embabel-agent
+  issue-labels:
+    - bug
+    - enhancement
+    - documentation
+    - invalid
 
 
 database:
