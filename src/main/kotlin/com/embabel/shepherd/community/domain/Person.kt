@@ -39,12 +39,55 @@ data class Profile(
     val categories: Set<String>,
 ) : HasUUID
 
-data class Person(
-    override val uuid: UUID,
-    val name: String,
-    val bio: String?,
-    val githubId: Long?,
-    val employer: Employer?,
-    val profile: Profile? = null
-) : HasUUID
+interface Person : HasUUID {
+    val name: String
+    val bio: String?
+    val githubId: Long?
+    val employer: Employer?
 
+    /**
+     * Create a PersonWithProfile by adding profile information to this person.
+     * Uses Kotlin delegation pattern similar to Issue.withRaisedBy.
+     */
+    fun withProfile(profile: Profile): PersonWithProfile {
+        val self = this
+        return object : PersonWithProfile, Person by self {
+            override val profile: Profile = profile
+        }
+    }
+
+    companion object {
+        /**
+         * Create a Person instance.
+         */
+        fun create(
+            uuid: UUID = UUID.randomUUID(),
+            name: String,
+            bio: String? = null,
+            githubId: Long? = null,
+            employer: Employer? = null,
+        ): Person = PersonImpl(
+            uuid = uuid,
+            name = name,
+            bio = bio,
+            githubId = githubId,
+            employer = employer,
+        )
+    }
+}
+
+internal data class PersonImpl(
+    override val uuid: UUID,
+    override val name: String,
+    override val bio: String?,
+    override val githubId: Long?,
+    override val employer: Employer?,
+) : Person
+
+/**
+ * A Person with profile information attached.
+ * This is a mixin interface that adds profile to Person using delegation.
+ */
+interface PersonWithProfile : Person {
+    val profile: Profile
+}

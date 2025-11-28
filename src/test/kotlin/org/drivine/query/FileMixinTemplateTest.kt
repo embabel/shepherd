@@ -20,6 +20,8 @@ class FileMixinTemplateTest {
     @BeforeEach
     fun setUp() {
         template = FileMixinTemplate(baseDir = tempDir.resolve(".data"))
+        // Register the package where test entities are defined
+        template.registerPackage("org.drivine.query")
     }
 
     @AfterEach

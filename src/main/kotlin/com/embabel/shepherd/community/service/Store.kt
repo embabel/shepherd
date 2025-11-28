@@ -45,7 +45,7 @@ class Store(
             .find { it.name == ghIssue.user.company }
         val existingPerson = mixinTemplate.findAll(Person::class.java)
             .find { it.githubId == ghIssue.user.id }
-        val newPerson = if (existingPerson == null) Person(
+        val newPerson = if (existingPerson == null) Person.create(
             uuid = UUID.randomUUID(),
             name = ghIssue.user.name ?: ghIssue.user.login,
             bio = ghIssue.user.bio ?: "",

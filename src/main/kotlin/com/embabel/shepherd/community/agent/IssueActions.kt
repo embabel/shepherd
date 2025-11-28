@@ -175,7 +175,7 @@ class IssueActions(
 
         // What about their github repos
 
-        store.save(person.copy(profile = profile))
+        store.save(person.withProfile(profile))
     }
 
     // TODO note that naming comes from blackboard, not parameter name

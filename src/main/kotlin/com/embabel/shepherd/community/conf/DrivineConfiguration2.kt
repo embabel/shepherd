@@ -5,8 +5,13 @@ import org.drivine.connection.DataSourceMap
 import org.drivine.connection.DatabaseType
 import org.drivine.manager.PersistenceManager
 import org.drivine.manager.PersistenceManagerFactory
+import com.embabel.shepherd.community.domain.HasUUID
+import org.drivine.query.AnnotationIdExtractor
+import org.drivine.query.CompositeIdExtractor
 import org.drivine.query.FileMixinTemplate
+import org.drivine.query.InterfaceIdExtractor
 import org.drivine.query.MixinTemplate
+import org.drivine.query.UuidExtractor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -50,7 +55,24 @@ class DrivineConfiguration2 {
 //    }
 
     @Bean
-    fun mixinTemplate(): MixinTemplate = FileMixinTemplate()
+    fun mixinTemplate(): MixinTemplate {
+        // Configure ID extractor: try HasUUID first, then @Id annotation
+        val uuidIdExtractor = InterfaceIdExtractor(HasUUID::class.java) { it.uuid }
+        val compositeIdExtractor = CompositeIdExtractor(uuidIdExtractor, AnnotationIdExtractor)
+
+        // Configure UUID extractor for reference properties
+        val uuidExtractor = UuidExtractor { entity ->
+            (entity as? HasUUID)?.uuid
+        }
+
+        return FileMixinTemplate(
+            idExtractor = compositeIdExtractor,
+            uuidExtractor = uuidExtractor,
+        ).apply {
+            // Register the package where domain classes live
+            registerPackage("com.embabel.shepherd.community.domain")
+        }
+    }
 
     @Bean
 //    @Profile("local & !test")
