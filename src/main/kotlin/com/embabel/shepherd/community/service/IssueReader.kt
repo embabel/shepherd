@@ -1,4 +1,4 @@
-package com.embabel.shepherd.service
+package com.embabel.shepherd.community.service
 
 import org.kohsuke.github.*
 import org.slf4j.LoggerFactory
@@ -17,13 +17,13 @@ data class RepoId(
          * Supports URLs like "https://github.com/owner/repo" or "https://github.com/owner/repo.git"
          * @return RepoId if the URL is valid, null otherwise
          */
-        fun fromUrl(url: String): RepoId {
+        fun fromUrl(url: String): RepoId? {
             return GITHUB_URL_REGEX.find(url)?.let { match ->
                 RepoId(
                     owner = match.groupValues[1],
                     repo = match.groupValues[2].removeSuffix(".git")
                 )
-            } ?: error("Invalid GitHub URL: $url")
+            }
         }
     }
 }

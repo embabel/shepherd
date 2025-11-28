@@ -1,11 +1,12 @@
-package com.embabel.shepherd.service
+package com.embabel.shepherd.community.service
 
-import com.embabel.shepherd.domain.*
+import com.embabel.shepherd.community.domain.*
 import org.drivine.query.MixinTemplate
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class Store(
@@ -45,7 +46,7 @@ class Store(
         val existingPerson = mixinTemplate.findAll(Person::class.java)
             .find { it.githubId == ghIssue.user.id }
         val newPerson = if (existingPerson == null) Person(
-            uuid = java.util.UUID.randomUUID(),
+            uuid = UUID.randomUUID(),
             name = ghIssue.user.name ?: ghIssue.user.login,
             bio = ghIssue.user.bio ?: "",
             githubId = ghIssue.user.id,

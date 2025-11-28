@@ -1,4 +1,4 @@
-package com.embabel.shepherd.service
+package com.embabel.shepherd.community.service
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

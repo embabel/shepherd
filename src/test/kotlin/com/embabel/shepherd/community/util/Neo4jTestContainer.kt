@@ -1,4 +1,4 @@
-package com.embabel.shepherd.util
+package com.embabel.shepherd.community.util
 
 import org.testcontainers.containers.Neo4jContainer
 import java.nio.file.Paths

@@ -1,4 +1,4 @@
-package com.embabel.shepherd.domain
+package com.embabel.shepherd.community.domain
 
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHIssueStateReason

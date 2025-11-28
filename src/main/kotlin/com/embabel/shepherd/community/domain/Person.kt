@@ -1,4 +1,4 @@
-package com.embabel.shepherd.domain
+package com.embabel.shepherd.community.domain
 
 import com.embabel.common.core.types.ZeroToOne
 import com.fasterxml.jackson.annotation.JsonPropertyDescription

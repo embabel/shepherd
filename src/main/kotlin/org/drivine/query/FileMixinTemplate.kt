@@ -1,9 +1,9 @@
 package org.drivine.query
 
-import com.embabel.shepherd.domain.HasUUID
-import com.embabel.shepherd.domain.Issue
-import com.embabel.shepherd.domain.Person
-import com.embabel.shepherd.domain.RaisableIssue
+import com.embabel.shepherd.community.domain.HasUUID
+import com.embabel.shepherd.community.domain.Issue
+import com.embabel.shepherd.community.domain.Person
+import com.embabel.shepherd.community.domain.RaisableIssue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -314,11 +314,12 @@ class FileMixinTemplate(
 
     private fun getPackageForType(typeName: String): String {
         // Return the package based on known types - this is a simple heuristic
-        return typePackages[typeName] ?: "com.embabel.shepherd.domain"
+        return typePackages[typeName] ?: "com.embabel.shepherd.community.domain"
     }
 
     private fun tryLoadClass(className: String): Class<*>? {
         val packagesToTry = listOf(
+            "com.embabel.shepherd.community.domain",
             "com.embabel.shepherd.domain",
             "org.drivine.query"
         )

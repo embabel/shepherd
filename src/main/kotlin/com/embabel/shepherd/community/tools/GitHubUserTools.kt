@@ -1,4 +1,4 @@
-package com.embabel.shepherd.tools
+package com.embabel.shepherd.community.tools
 
 import org.kohsuke.github.GHUser
 import org.springframework.ai.tool.annotation.Tool

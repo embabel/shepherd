@@ -1,6 +1,6 @@
 package org.drivine.query
 
-import com.embabel.shepherd.domain.HasUUID
+import com.embabel.shepherd.community.domain.HasUUID
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

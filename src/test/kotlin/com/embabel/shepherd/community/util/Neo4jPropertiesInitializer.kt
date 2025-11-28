@@ -1,4 +1,4 @@
-package com.embabel.shepherd.util
+package com.embabel.shepherd.community.util
 
 
 import org.drivine.connection.ConnectionProperties
@@ -30,7 +30,13 @@ class Neo4jPropertiesInitializer : ApplicationContextInitializer<ConfigurableApp
 
         val activeProfiles = applicationContext.environment.activeProfiles
 
-        println("@@@ Neo4jPropertiesInitializer.initialize() CALLED! useLocalNeo4j=$useLocalNeo4j (from Neo4jTestContainer.USE_LOCAL_NEO4J), activeProfiles=${activeProfiles.joinToString(",")} @@@")
+        println(
+            "@@@ Neo4jPropertiesInitializer.initialize() CALLED! useLocalNeo4j=$useLocalNeo4j (from Neo4jTestContainer.USE_LOCAL_NEO4J), activeProfiles=${
+                activeProfiles.joinToString(
+                    ","
+                )
+            } @@@"
+        )
 
         val properties = if (useLocalNeo4j) {
             println("@@@ Using local Neo4j at $LOCAL_NEO4J_URI @@@")

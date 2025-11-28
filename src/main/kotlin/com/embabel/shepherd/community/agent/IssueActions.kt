@@ -1,4 +1,4 @@
-package com.embabel.shepherd.agent
+package com.embabel.shepherd.community.agent
 
 import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.EmbabelComponent
@@ -6,12 +6,12 @@ import com.embabel.agent.api.common.Ai
 import com.embabel.agent.api.common.OperationContext
 import com.embabel.agent.core.CoreToolGroups
 import com.embabel.common.core.types.ZeroToOne
-import com.embabel.shepherd.conf.ShepherdProperties
-import com.embabel.shepherd.domain.Profile
-import com.embabel.shepherd.service.DummyGitHubUpdater
-import com.embabel.shepherd.service.GitHubUpdater
-import com.embabel.shepherd.service.Store
-import com.embabel.shepherd.tools.GitHubUserTools
+import com.embabel.shepherd.community.conf.ShepherdProperties
+import com.embabel.shepherd.community.domain.Profile
+import com.embabel.shepherd.community.service.DummyGitHubUpdater
+import com.embabel.shepherd.community.service.GitHubUpdater
+import com.embabel.shepherd.community.service.Store
+import com.embabel.shepherd.community.tools.GitHubUserTools
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest

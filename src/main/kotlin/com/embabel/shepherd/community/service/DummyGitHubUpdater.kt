@@ -1,4 +1,4 @@
-package com.embabel.shepherd.service
+package com.embabel.shepherd.community.service
 
 import org.kohsuke.github.GHIssue
 

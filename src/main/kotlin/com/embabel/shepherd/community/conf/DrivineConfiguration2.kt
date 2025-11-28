@@ -1,4 +1,4 @@
-package com.embabel.shepherd.conf
+package com.embabel.shepherd.community.conf
 
 import org.drivine.connection.ConnectionProperties
 import org.drivine.connection.DataSourceMap

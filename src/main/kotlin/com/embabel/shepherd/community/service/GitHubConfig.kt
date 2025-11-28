@@ -1,8 +1,8 @@
-package com.embabel.shepherd.service
+package com.embabel.shepherd.community.service
 
 import com.embabel.common.util.loggerFor
 import com.embabel.common.util.trim
-import com.embabel.shepherd.conf.ShepherdProperties
+import com.embabel.shepherd.community.conf.ShepherdProperties
 import org.kohsuke.github.GitHub
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean

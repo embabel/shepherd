@@ -1,10 +1,11 @@
 package org.drivine.query
 
-import com.embabel.shepherd.domain.Profile
+import com.embabel.shepherd.community.domain.Profile
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class ProfileDeserializationTest {

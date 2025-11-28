@@ -1,12 +1,12 @@
 package org.drivine.query
 
-import com.embabel.shepherd.domain.*
-import org.kohsuke.github.GHIssueStateReason
+import com.embabel.shepherd.community.domain.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.kohsuke.github.GHIssueStateReason
 import java.nio.file.Path
 import java.util.*
 
@@ -397,8 +397,10 @@ class PersonPersistenceTest {
         assertEquals(1, allRaisable.size)
 
         val retrievedIssue = allRaisable[0]
-        assertNotNull(retrievedIssue.raisedBy.profile,
-            "Person resolved via reference SHOULD have the updated profile")
+        assertNotNull(
+            retrievedIssue.raisedBy.profile,
+            "Person resolved via reference SHOULD have the updated profile"
+        )
         assertEquals(profile.bio, retrievedIssue.raisedBy.profile!!.bio)
 
         // Person queried directly should also have the profile

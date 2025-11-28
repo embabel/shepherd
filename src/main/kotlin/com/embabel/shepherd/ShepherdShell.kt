@@ -2,12 +2,12 @@ package com.embabel.shepherd
 
 import com.embabel.agent.api.invocation.UtilityInvocation
 import com.embabel.agent.core.AgentPlatform
-import com.embabel.shepherd.conf.ShepherdProperties
-import com.embabel.shepherd.domain.Person
-import com.embabel.shepherd.domain.PullRequest
-import com.embabel.shepherd.domain.RaisableIssue
-import com.embabel.shepherd.service.IssueReader
-import com.embabel.shepherd.service.RepoId
+import com.embabel.shepherd.community.conf.ShepherdProperties
+import com.embabel.shepherd.community.domain.Person
+import com.embabel.shepherd.community.domain.PullRequest
+import com.embabel.shepherd.community.domain.RaisableIssue
+import com.embabel.shepherd.community.service.IssueReader
+import com.embabel.shepherd.community.service.RepoId
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.drivine.query.FileMixinTemplate
 import org.drivine.query.MixinTemplate
@@ -33,7 +33,7 @@ class ShepherdShell(
         @ShellOption(defaultValue = "5", help = "How many issues to get") count: Int,
     ) {
         val repos = properties.repositoriesToMonitor
-            .map { RepoId.fromUrl(it) }
+            .mapNotNull { RepoId.fromUrl(it) }
         for (repo in repos) {
             val issues = issueReader.getLastIssues(repo, count, GHIssueState.OPEN)
             for (issue in issues) {
