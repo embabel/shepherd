@@ -2,6 +2,7 @@ package com.embabel.shepherd.domain
 
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHIssueStateReason
+import org.kohsuke.github.GitHub
 import java.util.*
 
 interface Issue : HasUUID {
@@ -20,6 +21,21 @@ interface Issue : HasUUID {
     val htmlUrl: String?
     val locked: Boolean
     val company: String?
+
+    /**
+     * Get the issue details from GitHub API.
+     * Parses the htmlUrl to extract repo owner/name and issue number.
+     */
+    fun materialize(github: GitHub): GHIssue {
+        // htmlUrl format: https://github.com/owner/repo/issues/123
+        val url = htmlUrl ?: throw IllegalStateException("Cannot materialize issue without htmlUrl")
+        val regex = Regex("github\\.com/([^/]+)/([^/]+)/(?:issues|pull)/(\\d+)")
+        val match = regex.find(url)
+            ?: throw IllegalStateException("Cannot parse GitHub URL: $url")
+
+        val (owner, repo, _) = match.destructured
+        return github.getRepository("$owner/$repo").getIssue(number)
+    }
 
     companion object {
 

@@ -2,9 +2,20 @@ package com.embabel.shepherd.domain
 
 import org.kohsuke.github.GHIssueStateReason
 import org.kohsuke.github.GHPullRequest
+import org.kohsuke.github.GitHub
 import java.util.*
 
 interface PullRequest : Issue {
+
+    /**
+     * Get the pull request details from GitHub API.
+     * Delegates to Issue.materialize and casts to GHPullRequest.
+     */
+    override fun materialize(github: GitHub): GHPullRequest {
+        val issue = super.materialize(github)
+        return issue as? GHPullRequest
+            ?: throw IllegalStateException("Expected GHPullRequest but got ${issue::class.simpleName} for PR #$number")
+    }
     val additions: Int
     val deletions: Int
     val changedFiles: Int
