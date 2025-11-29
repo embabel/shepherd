@@ -1,10 +1,9 @@
 shepherd:
   github-token: ${GITHUB_PERSONAL_ACCESS_TOKEN:#{null}}
-  first-responder-llm:
+  triage-llm:
     model: gpt-4.1-mini
     temperature: 0.3
-  researcher-llm:
-    model: gpt-4.1-mini
+
   profile-categories:
     - friend
     - competitor
@@ -42,6 +41,9 @@ shepherd:
     - documentation
     - invalid
 
+sherlock:
+  research-llm:
+    model: gpt-4.1-mini
 
 database:
   dataSources:

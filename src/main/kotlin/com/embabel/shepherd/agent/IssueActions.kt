@@ -74,7 +74,7 @@ class IssueActions(
         )
 
         val firstResponse = ai
-            .withLlm(properties.firstResponderLlm)
+            .withLlm(properties.triageLlm)
             .withId("issue_response")
             .creating(FirstResponse::class.java)
             .fromTemplate(
@@ -114,7 +114,7 @@ class IssueActions(
         )
 
         val firstResponse = ai
-            .withLlm(properties.firstResponderLlm)
+            .withLlm(properties.triageLlm)
             .withId("pr_response")
             .creating(FirstResponse::class.java)
             .fromTemplate(

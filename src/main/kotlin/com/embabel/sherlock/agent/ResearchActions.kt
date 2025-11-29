@@ -4,9 +4,9 @@ import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.Ai
 import com.embabel.agent.core.CoreToolGroups
-import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.service.Store
 import com.embabel.shepherd.tools.GitHubUserTools
+import com.embabel.sherlock.conf.SherlockProperties
 import com.embabel.sherlock.domain.PersonWithProfile
 import com.embabel.sherlock.domain.Profile
 import org.kohsuke.github.GHIssue
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 
 @EmbabelComponent
 class ResearchActions(
-    val properties: ShepherdProperties,
+    val properties: SherlockProperties,
     private val store: Store,
 ) {
 
@@ -38,7 +38,7 @@ class ResearchActions(
         )
         val person = issueStorageResult.newPerson ?: error("Internal error: should have new person")
         val profile = ai
-            .withLlm(properties.researcherLlm)
+            .withLlm(properties.researchLLm)
             .withId("person_research")
             .withTools(CoreToolGroups.WEB)
             .withToolObject(GitHubUserTools(ghIssue.user))

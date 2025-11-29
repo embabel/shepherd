@@ -14,8 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "shepherd")
 data class ShepherdProperties(
     val githubToken: String? = null,
-    val firstResponderLlm: LlmOptions,
-    val researcherLlm: LlmOptions,
+    val triageLlm: LlmOptions,
 
     val profileCategories: Set<String>,
 
