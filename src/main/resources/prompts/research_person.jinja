@@ -5,6 +5,14 @@ Be thorough. Try to find what if any programming languages they may know.
 
 Notes on fields:
 
+- languages: set of programming languages they're proficient in, from the following list:
+{% for language in properties.programmingLanguages %}
+    - {{ language }}
+{% endfor %}
+- frameworks: set of frameworks they're proficient in, from the following list:
+{% for framework in properties.frameworks %}
+    - {{ framework }}
+{% endfor %}
 - importance (0-1): how important is this person likely to be to the Embabel agent framework?
 Consider the strength of their skills, their employer, Twitter followers etc.
 - categories: set of relevant categories for this person, from the following list:

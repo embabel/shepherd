@@ -17,9 +17,9 @@ data class Profile(
     val updated: Instant = Instant.now(),
     val bio: String,
     val homepage: String?,
-    @param:JsonPropertyDescription("programming languages as generally written, eg Java, Python or C#")
+    @param:JsonPropertyDescription("programming languages as per list provided")
     val programmingLanguages: Set<String>,
-    @param:JsonPropertyDescription("frameworks as generally written, eg Spring or React")
+    @param:JsonPropertyDescription("frameworks as per list provided")
     val frameworks: Set<String>,
     @param:JsonPropertyDescription("2 digit lowercase country code if known")
     val countryCode: String? = null,

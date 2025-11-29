@@ -22,4 +22,8 @@ data class ShepherdProperties(
     val repositoriesToMonitor: Set<String>,
 
     val issueLabels: Set<String>,
+
+    val programmingLanguages: Set<String>,
+
+    val frameworks: Set<String>,
 )

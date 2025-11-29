@@ -9,7 +9,29 @@ shepherd:
     - friend
     - competitor
     - contributor
+  programming-languages:
+    - Java
+    - Kotlin
+    - Python
+    - JavaScript
+    - TypeScript
+    - Go
+    - Ruby
+    - C#
+    - C++
+    - C
+    - Scala
+    - Rust
 
+  frameworks:
+    - Spring
+    - React
+    - Angular
+    - .NET
+    - Ruby on Rails
+    - Node.js
+    - Flask
+    - Laravel
   
   
   repositories-to-monitor:
