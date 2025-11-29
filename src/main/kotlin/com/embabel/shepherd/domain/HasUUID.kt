@@ -1,4 +1,4 @@
-package com.embabel.shepherd.community.domain
+package com.embabel.shepherd.domain
 
 import java.util.*
 

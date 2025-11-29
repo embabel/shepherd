@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.embabel.shepherd
+package com.embabel
 
 import com.embabel.agent.config.annotation.EnableAgents
 import com.embabel.agent.config.annotation.LoggingThemes
 import com.embabel.agent.config.annotation.McpServers
-import com.embabel.shepherd.community.conf.ShepherdProperties
+import com.embabel.shepherd.conf.ShepherdProperties
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication

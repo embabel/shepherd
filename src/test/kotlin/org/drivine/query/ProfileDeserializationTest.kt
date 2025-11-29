@@ -1,6 +1,6 @@
 package org.drivine.query
 
-import com.embabel.shepherd.proprietary.domain.Profile
+import com.embabel.sherlock.domain.Profile
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule

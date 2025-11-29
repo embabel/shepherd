@@ -1,4 +1,4 @@
-package com.embabel.shepherd.community.domain
+package com.embabel.shepherd.domain
 
 import java.util.*
 
@@ -15,10 +15,8 @@ interface Person : HasUUID {
     val employer: Employer?
 
     companion object {
-        /**
-         * Create a Person instance.
-         */
-        fun create(
+
+        operator fun invoke(
             uuid: UUID = UUID.randomUUID(),
             name: String,
             bio: String? = null,

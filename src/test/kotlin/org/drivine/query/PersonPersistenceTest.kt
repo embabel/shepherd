@@ -1,8 +1,8 @@
 package org.drivine.query
 
-import com.embabel.shepherd.community.domain.*
-import com.embabel.shepherd.proprietary.domain.PersonWithProfile
-import com.embabel.shepherd.proprietary.domain.Profile
+import com.embabel.shepherd.domain.*
+import com.embabel.sherlock.domain.PersonWithProfile
+import com.embabel.sherlock.domain.Profile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -48,7 +48,7 @@ class PersonPersistenceTest {
 
     @Test
     fun `should persist Person with uuid`() {
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Alice",
             bio = "Software engineer",
@@ -69,7 +69,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Acme Corp"
         )
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Bob",
             bio = "Developer",
@@ -119,7 +119,7 @@ class PersonPersistenceTest {
             name = "Shared Corp"
         )
 
-        val person1 = Person.create(
+        val person1 = Person(
             uuid = UUID.randomUUID(),
             name = "Charlie",
             bio = "Engineer",
@@ -127,7 +127,7 @@ class PersonPersistenceTest {
             employer = sharedOrg
         )
 
-        val person2 = Person.create(
+        val person2 = Person(
             uuid = UUID.randomUUID(),
             name = "Diana",
             bio = "Designer",
@@ -168,7 +168,7 @@ class PersonPersistenceTest {
 
     @Test
     fun `should retrieve persisted Person with null Employer`() {
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Eve",
             bio = "Architect",
@@ -223,7 +223,7 @@ class PersonPersistenceTest {
 
     @Test
     fun `should find all HasUUID implementations`() {
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Alice",
             bio = null,
@@ -263,7 +263,7 @@ class PersonPersistenceTest {
 
     @Test
     fun `should persist and retrieve RaisableIssue created with withRaisedBy`() {
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Reporter",
             bio = "Bug reporter",
@@ -318,7 +318,7 @@ class PersonPersistenceTest {
             categories = setOf("developer")
         )
 
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Developer",
             bio = "Writes code",
@@ -350,7 +350,7 @@ class PersonPersistenceTest {
     @Test
     fun `updating Person after saving PersonWithProfile DOES update via reference resolution`() {
         // First save a basic person
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Developer",
             bio = "Writes code",
@@ -391,7 +391,7 @@ class PersonPersistenceTest {
     @Test
     fun `should save loaded entity back after creating relationship`() {
         // Save a person first
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Reporter",
             bio = "Bug hunter",
@@ -443,7 +443,7 @@ class PersonPersistenceTest {
         // A new Person is created via Person.create(), then a profile is attached
         // and saved via store.save(PersonWithProfile.from(person, profile))
 
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "New Contributor",
             bio = "Found a bug",
@@ -485,7 +485,7 @@ class PersonPersistenceTest {
     @Test
     fun `should save loaded entity with new profile attached`() {
         // Save a person first
-        val person = Person.create(
+        val person = Person(
             uuid = UUID.randomUUID(),
             name = "Developer",
             bio = "Writes code",
@@ -526,7 +526,7 @@ class PersonPersistenceTest {
     @Test
     fun `should persist and retrieve PullRequest with all PR-specific fields`() {
         val prUuid = UUID.randomUUID()
-        val pr = PullRequest.create(
+        val pr = PullRequest(
             uuid = prUuid,
             id = 99999L,
             state = "open",
@@ -593,7 +593,7 @@ class PersonPersistenceTest {
     @Test
     fun `should find PullRequest when querying by Issue interface`() {
         val prUuid = UUID.randomUUID()
-        val pr = PullRequest.create(
+        val pr = PullRequest(
             uuid = prUuid,
             id = 88888L,
             state = "closed",
@@ -633,7 +633,7 @@ class PersonPersistenceTest {
     @Test
     fun `should persist merged PullRequest with merge details`() {
         val prUuid = UUID.randomUUID()
-        val pr = PullRequest.create(
+        val pr = PullRequest(
             uuid = prUuid,
             id = 77777L,
             state = "closed",
@@ -675,7 +675,7 @@ class PersonPersistenceTest {
     @Test
     fun `should persist draft PullRequest`() {
         val prUuid = UUID.randomUUID()
-        val pr = PullRequest.create(
+        val pr = PullRequest(
             uuid = prUuid,
             id = 66666L,
             state = "open",
@@ -718,7 +718,7 @@ class PersonPersistenceTest {
             htmlUrl = "https://github.com/test/repo/issues/1",
         )
 
-        val pr = PullRequest.create(
+        val pr = PullRequest(
             uuid = UUID.randomUUID(),
             id = 22222L,
             state = "open",

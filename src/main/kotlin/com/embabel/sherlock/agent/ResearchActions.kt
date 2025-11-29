@@ -1,14 +1,14 @@
-package com.embabel.shepherd.proprietary.agent
+package com.embabel.sherlock.agent
 
 import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.Ai
 import com.embabel.agent.core.CoreToolGroups
-import com.embabel.shepherd.community.conf.ShepherdProperties
-import com.embabel.shepherd.community.service.Store
-import com.embabel.shepherd.community.tools.GitHubUserTools
-import com.embabel.shepherd.proprietary.domain.PersonWithProfile
-import com.embabel.shepherd.proprietary.domain.Profile
+import com.embabel.shepherd.conf.ShepherdProperties
+import com.embabel.shepherd.service.Store
+import com.embabel.shepherd.tools.GitHubUserTools
+import com.embabel.sherlock.domain.PersonWithProfile
+import com.embabel.sherlock.domain.Profile
 import org.kohsuke.github.GHIssue
 import org.slf4j.LoggerFactory
 
@@ -57,7 +57,7 @@ class ResearchActions(
             person.name,
             profile,
         )
-        
+
         store.save(PersonWithProfile.from(person, profile))
     }
 

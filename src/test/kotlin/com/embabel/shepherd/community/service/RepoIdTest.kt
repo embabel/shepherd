@@ -1,5 +1,6 @@
 package com.embabel.shepherd.community.service
 
+import com.embabel.shepherd.service.RepoId
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

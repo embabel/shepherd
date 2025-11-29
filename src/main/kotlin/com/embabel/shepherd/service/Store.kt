@@ -1,6 +1,6 @@
-package com.embabel.shepherd.community.service
+package com.embabel.shepherd.service
 
-import com.embabel.shepherd.community.domain.*
+import com.embabel.shepherd.domain.*
 import org.drivine.query.MixinTemplate
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
@@ -38,21 +38,21 @@ class Store(
         val issue = if (ghIssue is GHPullRequest) {
             PullRequest.fromGHPullRequest(ghIssue)
         } else {
-            Issue.fromGHIssue(ghIssue)
+            Issue.Companion.fromGHIssue(ghIssue)
         }
         val saved = mixinTemplate.save(issue)
         val employer = mixinTemplate.findAll(Employer::class.java)
             .find { it.name == ghIssue.user.company }
         val existingPerson = mixinTemplate.findAll(Person::class.java)
             .find { it.githubId == ghIssue.user.id }
-        val newPerson = if (existingPerson == null) Person.create(
+        val newPerson = if (existingPerson == null) Person.Companion(
             uuid = UUID.randomUUID(),
             name = ghIssue.user.name ?: ghIssue.user.login,
             bio = ghIssue.user.bio ?: "",
             githubId = ghIssue.user.id,
             employer = employer,
         ) else null
-        val raisableIssue = RaisableIssue.from(saved, existingPerson ?: newPerson!!)
+        val raisableIssue = RaisableIssue.Companion.from(saved, existingPerson ?: newPerson!!)
         mixinTemplate.save(raisableIssue)
         return IssueStorageResult(
             issue = raisableIssue,

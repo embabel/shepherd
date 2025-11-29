@@ -1,17 +1,12 @@
-package com.embabel.shepherd.community.conf
+package com.embabel.shepherd.conf
 
+import com.embabel.shepherd.domain.HasUUID
 import org.drivine.connection.ConnectionProperties
 import org.drivine.connection.DataSourceMap
 import org.drivine.connection.DatabaseType
 import org.drivine.manager.PersistenceManager
 import org.drivine.manager.PersistenceManagerFactory
-import com.embabel.shepherd.community.domain.HasUUID
-import org.drivine.query.AnnotationIdExtractor
-import org.drivine.query.CompositeIdExtractor
-import org.drivine.query.FileMixinTemplate
-import org.drivine.query.InterfaceIdExtractor
-import org.drivine.query.MixinTemplate
-import org.drivine.query.UuidExtractor
+import org.drivine.query.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan

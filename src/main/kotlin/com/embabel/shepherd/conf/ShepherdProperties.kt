@@ -1,4 +1,4 @@
-package com.embabel.shepherd.community.conf
+package com.embabel.shepherd.conf
 
 import com.embabel.common.ai.model.LlmOptions
 import org.springframework.boot.context.properties.ConfigurationProperties

@@ -1,4 +1,4 @@
-package com.embabel.shepherd.community.domain
+package com.embabel.shepherd.domain
 
 import org.kohsuke.github.GHIssueStateReason
 import org.kohsuke.github.GHPullRequest
@@ -58,7 +58,7 @@ interface PullRequest : Issue {
         /**
          * Create a PullRequest for testing purposes.
          */
-        fun create(
+        operator fun invoke(
             uuid: UUID = UUID.randomUUID(),
             id: Long,
             state: String? = null,

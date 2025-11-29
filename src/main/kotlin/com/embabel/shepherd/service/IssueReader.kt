@@ -1,4 +1,4 @@
-package com.embabel.shepherd.community.service
+package com.embabel.shepherd.service
 
 import org.kohsuke.github.*
 import org.slf4j.LoggerFactory

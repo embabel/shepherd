@@ -1,8 +1,8 @@
-package com.embabel.shepherd.proprietary.domain
+package com.embabel.sherlock.domain
 
 import com.embabel.common.core.types.ZeroToOne
-import com.embabel.shepherd.community.domain.HasUUID
-import com.embabel.shepherd.community.domain.Person
+import com.embabel.shepherd.domain.HasUUID
+import com.embabel.shepherd.domain.Person
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import java.time.Instant
 import java.util.*
