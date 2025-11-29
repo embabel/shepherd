@@ -2,6 +2,7 @@ package org.drivine.query
 
 import com.embabel.shepherd.community.domain.*
 import com.embabel.shepherd.proprietary.domain.PersonWithProfile
+import com.embabel.shepherd.proprietary.domain.Profile
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
