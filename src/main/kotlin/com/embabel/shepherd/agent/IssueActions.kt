@@ -14,14 +14,7 @@ import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
 import org.slf4j.LoggerFactory
 
-interface TriggerToken
-
-internal object NewIssue : TriggerToken
-internal object UpdatedIssue : TriggerToken
-internal object NewPerson : TriggerToken
-
-
-data class FirstResponse(
+data class IssueAssessment(
     val comment: String,
     @field:JsonPropertyDescription("A value between 0 and 1 indicating the urgency of addressing this issue, where 1 is most urgent")
     val urgency: ZeroToOne,
@@ -29,6 +22,17 @@ data class FirstResponse(
     val sentiment: ZeroToOne,
     @field:JsonPropertyDescription("Labels to apply to the issue")
     val labels: Set<String>,
+)
+
+data class PullRequestAssessment(
+    val comment: String,
+    @field:JsonPropertyDescription("A value between 0 and 1 indicating the urgency of addressing this issue, where 1 is most urgent")
+    val urgency: ZeroToOne,
+    @field:JsonPropertyDescription("A value between 0 and 1 indicating the sentiment of the person who opened the issue, where 0 is negative and 1 is positive")
+    val sentiment: ZeroToOne,
+    @field:JsonPropertyDescription("Labels to apply to the issue")
+    val labels: Set<String>,
+    val filesChanged: Int = -1,
 )
 
 
@@ -67,7 +71,7 @@ class IssueActions(
         ghIssue: GHIssue,
         issueStorageResult: Store.IssueStorageResult,
         ai: Ai
-    ): FirstResponse {
+    ): IssueAssessment {
         logger.info(
             "Found new issue to react to: #{}, title='{}'",
             ghIssue.number, ghIssue.title
@@ -76,7 +80,7 @@ class IssueActions(
         val firstResponse = ai
             .withLlm(properties.triageLlm)
             .withId("issue_response")
-            .creating(FirstResponse::class.java)
+            .creating(IssueAssessment::class.java)
             .fromTemplate(
                 "first_issue_response",
                 mapOf(
@@ -85,7 +89,7 @@ class IssueActions(
                 ),
             )
         logger.info(
-            "Generated first response for issue #{}: comment='{}', urgency={}, sentiment={}",
+            "Assessed issue #{}: comment='{}', urgency={}, sentiment={}",
             ghIssue.number,
             firstResponse.comment,
             firstResponse.urgency,
@@ -103,11 +107,11 @@ class IssueActions(
     @Action(
         pre = ["spel:ghIssue instanceof T(org.kohsuke.github.GHPullRequest)"]
     )
-    fun reactToNewPr(
+    fun reactToNewPullRequest(
         ghIssue: GHPullRequest,
         issueStorageResult: Store.IssueStorageResult,
         ai: Ai,
-    ): FirstResponse {
+    ): PullRequestAssessment {
         logger.info(
             "Found new PR to react to: #{}, title='{}'",
             ghIssue.number, ghIssue.title
@@ -116,13 +120,16 @@ class IssueActions(
         val firstResponse = ai
             .withLlm(properties.triageLlm)
             .withId("pr_response")
-            .creating(FirstResponse::class.java)
+            .withoutProperties("filesChanged")
+            .creating(PullRequestAssessment::class.java)
             .fromTemplate(
                 "first_pr_response",
                 mapOf("pr" to ghIssue),
+            ).copy(
+                filesChanged = ghIssue.changedFiles,
             )
         logger.info(
-            "Generated first response for PR #{}: comment='{}', urgency={}, sentiment={}",
+            "Assessed PR #{}: comment='{}', urgency={}, sentiment={}",
             ghIssue.number,
             firstResponse.comment,
             firstResponse.urgency,
@@ -136,7 +143,17 @@ class IssueActions(
     @Action(
         pre = ["spel:firstResponse.urgency > 0.0"]
     )
-    fun heavyHitter(issue: GHIssue, firstResponse: FirstResponse) {
+    fun heavyHitter(issue: GHIssue, issueAssessment: IssueAssessment) {
         logger.info("Taking heavy hitter action on issue #{}", issue.number)
+    }
+
+    @Action(
+        pre = ["spel:ghIssue instanceof T(org.kohsuke.github.GHPullRequest) && ghIssue.changedFiles > 10"]
+    )
+    fun bigPullRequest(
+        issue: GHPullRequest,
+        pullRequestAssessment: PullRequestAssessment,
+    ) {
+        logger.info("Big PR: #{}", issue.number)
     }
 }

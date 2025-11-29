@@ -4,10 +4,7 @@ shepherd:
     model: gpt-4.1-mini
     temperature: 0.3
 
-  profile-categories:
-    - friend
-    - competitor
-    - contributor
+
   programming-languages:
     - Java
     - Kotlin
@@ -35,15 +32,26 @@ shepherd:
   
   repositories-to-monitor:
     - https://github.com/embabel/embabel-agent
+
   issue-labels:
     - bug
     - enhancement
     - documentation
     - invalid
+    - duplicate
+    - minor
 
 sherlock:
   research-llm:
     model: gpt-4.1-mini
+
+
+  profile-categories:
+    - promoter
+    - detractor
+    - competitor
+    - contributor
+    - user
 
 database:
   dataSources:

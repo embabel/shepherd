@@ -8,5 +8,7 @@ import org.kohsuke.github.GHIssue
 interface GitHubUpdater {
 
     fun labelIssue(ghIssue: GHIssue, labels: Collection<String>)
+
+    fun addComment(ghIssue: GHIssue, comment: String)
 }
 
