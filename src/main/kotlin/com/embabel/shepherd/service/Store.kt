@@ -56,20 +56,41 @@ class Store(
     }
 
     /**
+     * Retrieve an existing employer by company name, or create a new one.
+     * Uses case-insensitive matching and company alias resolution.
+     */
+    @Transactional
+    fun retrieveOrCreateEmployer(companyName: String?): RetrieveOrCreate<Employer>? {
+        if (companyName.isNullOrBlank()) {
+            return null
+        }
+
+        return retrieveOrCreate(
+            {
+                // Find employer using case-insensitive matching with alias support
+                mixinTemplate.findAll(Employer::class.java)
+                    .find { it.matches(companyName) }
+            }
+        ) {
+            // Create new employer with the original company name as canonical
+            // Add normalized variant as alias if different from the original
+            val normalized = Employer.canonicalize(companyName)
+            val aliases = if (normalized != companyName.lowercase()) {
+                setOf(normalized)
+            } else {
+                emptySet()
+            }
+            Employer(name = companyName, aliases = aliases)
+        }
+    }
+
+    /**
      * Retrieve an existing person by GitHub ID, or create a new one from the GHUser.
      * Do not save the person as we may further change it within this transaction
      */
     @Transactional
     fun retrieveOrCreatePersonFrom(ghUser: GHUser): RetrieveOrCreate<Person> {
-        val employer = ghUser.company?.let { company ->
-            retrieveOrCreate(
-                {
-                    mixinTemplate.findAll(Employer::class.java)
-                        .find { it.name == company }
-                }) {
-                Employer(name = company)
-            }
-        }
+        val employer = retrieveOrCreateEmployer(ghUser.company)
 
         return retrieveOrCreate({
             // TODO inefficient. Improve when we have proper querying
