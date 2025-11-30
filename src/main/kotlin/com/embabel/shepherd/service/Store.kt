@@ -32,42 +32,62 @@ class Store(
     )
 
     /**
-     * A person retrieval result, indicating whether the person already existed or was newly created.
+     * A retrieval result, indicating whether the entity already existed or was newly created.
      */
-    data class PersonRetrieval(
-        val person: Person,
+    data class RetrieveOrCreate<T>(
+        val entity: T,
         val existing: Boolean,
     )
+
+    /**
+     * Retrieve or create an entity of the given type.
+     * Do not save the new entity
+     */
+    @Transactional
+    fun <T> retrieveOrCreate(
+        retriever: () -> T?,
+        creator: () -> T,
+    ): RetrieveOrCreate<T> {
+        val existing = retriever()
+        if (existing != null) {
+            return RetrieveOrCreate(entity = existing, existing = true)
+        }
+        return RetrieveOrCreate(entity = creator(), existing = false)
+    }
 
     /**
      * Retrieve an existing person by GitHub ID, or create a new one from the GHUser.
      * Do not save the person as we may further change it within this transaction
      */
     @Transactional
-    fun retrieveOrCreatePersonFrom(ghUser: GHUser): PersonRetrieval {
-        val existingPerson = mixinTemplate.findAll(Person::class.java)
-            .find { it.githubId == ghUser.id }
-
-        if (existingPerson != null) {
-            return PersonRetrieval(person = existingPerson, existing = true)
+    fun retrieveOrCreatePersonFrom(ghUser: GHUser): RetrieveOrCreate<Person> {
+        val employer = ghUser.company?.let { company ->
+            retrieveOrCreate(
+                {
+                    mixinTemplate.findAll(Employer::class.java)
+                        .find { it.name == company }
+                }) {
+                Employer(name = company)
+            }
         }
 
-        val employer = mixinTemplate.findAll(Employer::class.java)
-            .find { it.name == ghUser.company }
-
-        val newPerson = Person(
-            uuid = UUID.randomUUID(),
-            name = ghUser.name ?: ghUser.login,
-            bio = ghUser.bio ?: "",
-            githubId = ghUser.id,
-            employer = employer,
-        )
-
-        return PersonRetrieval(person = newPerson, existing = false)
+        return retrieveOrCreate({
+            // TODO inefficient. Improve when we have proper querying
+            mixinTemplate.findAll(Person::class.java)
+                .find { it.githubId == ghUser.id }
+        }) {
+            Person(
+                uuid = UUID.randomUUID(),
+                name = ghUser.name ?: ghUser.login,
+                bio = ghUser.bio ?: "",
+                githubId = ghUser.id,
+                employer = employer?.entity,
+            )
+        }
     }
 
     /**
-     * Save the issue and its company and person if not already present
+     * Save the issue and its person and company if not already present
      */
     @Transactional
     fun saveAndExpandIssue(ghIssue: GHIssue): IssueStorageResult {
@@ -79,12 +99,12 @@ class Store(
         val saved = mixinTemplate.save(issue)
 
         val personRetrieval = retrieveOrCreatePersonFrom(ghIssue.user)
-        val raisableIssue = RaisableIssue.from(saved, personRetrieval.person)
+        val raisableIssue = RaisableIssue.from(saved, personRetrieval.entity)
         mixinTemplate.save(raisableIssue)
 
         return IssueStorageResult(
             issue = raisableIssue,
-            newPerson = if (personRetrieval.existing) null else personRetrieval.person,
+            newPerson = if (personRetrieval.existing) null else personRetrieval.entity,
         )
     }
 

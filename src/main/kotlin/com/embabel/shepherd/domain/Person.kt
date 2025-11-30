@@ -4,8 +4,8 @@ import java.util.*
 
 
 data class Employer(
-    override val uuid: UUID,
     val name: String,
+    override val uuid: UUID = UUID.randomUUID(),
 ) : HasUUID
 
 interface Person : HasUUID {

@@ -31,11 +31,10 @@ class StarActions(
         )
 
         val personRetrieval = store.retrieveOrCreatePersonFrom(user)
-
         if (!personRetrieval.existing) {
             logger.info("Created new person for stargazer: login='{}', name='{}'", user.login, user.name)
-            store.save(personRetrieval.person)
-            return NewPerson(personRetrieval.person)
+            store.save(personRetrieval.entity)
+            return NewPerson(personRetrieval.entity)
         }
         return null
     }
