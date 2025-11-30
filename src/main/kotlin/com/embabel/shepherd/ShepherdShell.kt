@@ -30,8 +30,8 @@ class ShepherdShell(
     private val objectMapper: ObjectMapper,
 ) {
 
-    @ShellMethod("run")
-    fun run(
+    @ShellMethod("fetch issues")
+    fun lastIssues(
         @ShellOption(defaultValue = "5", help = "How many issues to get") count: Int,
     ) {
         val repos = properties.repositoriesToMonitor

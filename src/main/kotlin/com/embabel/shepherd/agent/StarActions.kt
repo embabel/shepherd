@@ -5,7 +5,6 @@ import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.service.Store
 import org.kohsuke.github.GHStargazer
-import org.kohsuke.github.GHUser
 import org.slf4j.LoggerFactory
 
 @EmbabelComponent
@@ -17,10 +16,10 @@ class StarActions(
     private val logger = LoggerFactory.getLogger(StarActions::class.java)
 
     /**
-     * React to a stargazer by extracting the user who starred the repository.
+     * React to a stargazer by finding or creating the person who starred the repository.
      */
     @Action
-    fun reactToStar(stargazer: GHStargazer): GHUser {
+    fun reactToStar(stargazer: GHStargazer): NewPerson? {
         val user = stargazer.user
         val starredAt = stargazer.starredAt
 
@@ -31,6 +30,13 @@ class StarActions(
             starredAt
         )
 
-        return user
+        val personRetrieval = store.retrieveOrCreatePersonFrom(user)
+
+        if (!personRetrieval.existing) {
+            logger.info("Created new person for stargazer: login='{}', name='{}'", user.login, user.name)
+            store.save(personRetrieval.person)
+            return NewPerson(personRetrieval.person)
+        }
+        return null
     }
 }

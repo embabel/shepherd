@@ -104,6 +104,11 @@ class IssueActions(
         return firstResponse
     }
 
+    @Action
+    fun publishNewPerson(issueStorageResult: Store.IssueStorageResult): NewPerson? {
+        return issueStorageResult.newPerson?.let { NewPerson(it) }
+    }
+
     @Action(
         pre = ["spel:ghIssue instanceof T(org.kohsuke.github.GHPullRequest)"]
     )

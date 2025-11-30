@@ -4,6 +4,7 @@ import com.embabel.shepherd.domain.*
 import org.drivine.query.MixinTemplate
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
+import org.kohsuke.github.GHUser
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -31,6 +32,41 @@ class Store(
     )
 
     /**
+     * A person retrieval result, indicating whether the person already existed or was newly created.
+     */
+    data class PersonRetrieval(
+        val person: Person,
+        val existing: Boolean,
+    )
+
+    /**
+     * Retrieve an existing person by GitHub ID, or create a new one from the GHUser.
+     * Do not save the person as we may further change it within this transaction
+     */
+    @Transactional
+    fun retrieveOrCreatePersonFrom(ghUser: GHUser): PersonRetrieval {
+        val existingPerson = mixinTemplate.findAll(Person::class.java)
+            .find { it.githubId == ghUser.id }
+
+        if (existingPerson != null) {
+            return PersonRetrieval(person = existingPerson, existing = true)
+        }
+
+        val employer = mixinTemplate.findAll(Employer::class.java)
+            .find { it.name == ghUser.company }
+
+        val newPerson = Person(
+            uuid = UUID.randomUUID(),
+            name = ghUser.name ?: ghUser.login,
+            bio = ghUser.bio ?: "",
+            githubId = ghUser.id,
+            employer = employer,
+        )
+
+        return PersonRetrieval(person = newPerson, existing = false)
+    }
+
+    /**
      * Save the issue and its company and person if not already present
      */
     @Transactional
@@ -38,25 +74,17 @@ class Store(
         val issue = if (ghIssue is GHPullRequest) {
             PullRequest.fromGHPullRequest(ghIssue)
         } else {
-            Issue.Companion.fromGHIssue(ghIssue)
+            Issue.fromGHIssue(ghIssue)
         }
         val saved = mixinTemplate.save(issue)
-        val employer = mixinTemplate.findAll(Employer::class.java)
-            .find { it.name == ghIssue.user.company }
-        val existingPerson = mixinTemplate.findAll(Person::class.java)
-            .find { it.githubId == ghIssue.user.id }
-        val newPerson = if (existingPerson == null) Person.Companion(
-            uuid = UUID.randomUUID(),
-            name = ghIssue.user.name ?: ghIssue.user.login,
-            bio = ghIssue.user.bio ?: "",
-            githubId = ghIssue.user.id,
-            employer = employer,
-        ) else null
-        val raisableIssue = RaisableIssue.Companion.from(saved, existingPerson ?: newPerson!!)
+
+        val personRetrieval = retrieveOrCreatePersonFrom(ghIssue.user)
+        val raisableIssue = RaisableIssue.from(saved, personRetrieval.person)
         mixinTemplate.save(raisableIssue)
+
         return IssueStorageResult(
             issue = raisableIssue,
-            newPerson = newPerson,
+            newPerson = if (personRetrieval.existing) null else personRetrieval.person,
         )
     }
 

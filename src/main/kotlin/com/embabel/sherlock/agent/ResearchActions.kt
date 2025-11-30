@@ -4,12 +4,11 @@ import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.Ai
 import com.embabel.agent.core.CoreToolGroups
+import com.embabel.shepherd.agent.NewPerson
 import com.embabel.shepherd.service.Store
-import com.embabel.shepherd.tools.GitHubUserTools
 import com.embabel.sherlock.conf.SherlockProperties
 import com.embabel.sherlock.domain.PersonWithProfile
 import com.embabel.sherlock.domain.Profile
-import org.kohsuke.github.GHIssue
 import org.slf4j.LoggerFactory
 
 @EmbabelComponent
@@ -23,25 +22,23 @@ class ResearchActions(
     /**
      * The person raising this issue isn't already known to us.
      */
-    @Action(
-        pre = ["spel:issueStorageResult.newPerson != null"]
-    )
-    fun researchRaiser(
-        ghIssue: GHIssue,
-        issueStorageResult: Store.IssueStorageResult,
+    @Action
+    fun researchPerson(
+        newPerson: NewPerson,
         ai: Ai
     ) {
+        val person = newPerson.person
         logger.info(
-            "Researching person raising issue #{}: githubId={}",
-            ghIssue.number,
-            ghIssue.user.id,
+            "Researching person {}",
+            newPerson.person,
         )
-        val person = issueStorageResult.newPerson ?: error("Internal error: should have new person")
+
         val profile = ai
             .withLlm(properties.researchLLm)
             .withId("person_research")
             .withTools(CoreToolGroups.WEB)
-            .withToolObject(GitHubUserTools(ghIssue.user))
+            // TODO restore this
+//            .withToolObject(GitHubUserTools(newPerson.person.githubId))
             .withoutProperties("uuid", "updated")
             .creating(Profile::class.java)
             .fromTemplate(
@@ -52,8 +49,7 @@ class ResearchActions(
                 ),
             )
         logger.info(
-            "Researched person raising issue #{}: name='{}', profile='{}'",
-            ghIssue.number,
+            "Researched person name='{}', profile='{}'",
             person.name,
             profile,
         )
