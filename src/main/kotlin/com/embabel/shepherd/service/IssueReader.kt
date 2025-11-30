@@ -82,4 +82,25 @@ class IssueReader(
             emptyList()
         }
     }
+
+    /**
+     * Get the most recent stargazers for a specific repository.
+     * Uses listStargazers() which includes the starred_at timestamp.
+     */
+    fun getLastStargazers(
+        repoId: RepoId,
+        count: Int = 10,
+    ): List<GHStargazer> {
+        val (owner, repo) = repoId
+        return try {
+            github.getRepository("$owner/$repo")
+                .listStargazers()
+                .toList()
+                .sortedByDescending { it.starredAt }
+                .take(count)
+        } catch (e: Exception) {
+            logger.error("Error fetching stargazers for $owner/$repo: ${e.message}")
+            emptyList()
+        }
+    }
 }

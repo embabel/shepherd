@@ -43,7 +43,22 @@ class ShepherdShell(
                     .terminateWhenStuck()
                     .run(issue)
             }
+        }
+    }
 
+    @ShellMethod("stars")
+    fun stars(
+        @ShellOption(defaultValue = "5", help = "How many stars to get") count: Int,
+    ) {
+        val repos = properties.repositoriesToMonitor
+            .mapNotNull { RepoId.fromUrl(it) }
+        for (repo in repos) {
+            val stargazers = issueReader.getLastStargazers(repo, count)
+            for (stargazer in stargazers) {
+                UtilityInvocation.on(agentPlatform)
+                    .terminateWhenStuck()
+                    .run(stargazer)
+            }
         }
     }
 
