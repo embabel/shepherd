@@ -15,12 +15,10 @@ import org.drivine.query.MixinTemplate
 import org.drivine.query.findAll
 import org.drivine.query.findById
 import org.kohsuke.github.GHIssueState
-import org.springframework.context.annotation.Profile
 import org.springframework.shell.standard.ShellComponent
 import org.springframework.shell.standard.ShellMethod
 import org.springframework.shell.standard.ShellOption
 
-@Profile("!test")
 @ShellComponent
 class ShepherdShell(
     private val agentPlatform: AgentPlatform,

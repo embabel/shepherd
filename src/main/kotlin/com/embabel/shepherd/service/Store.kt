@@ -17,6 +17,7 @@ class Store(
 
     @Transactional(readOnly = true)
     fun findIssueByGithubId(id: Long): Issue? {
+        // TODO remove once we have an efficient way of doing this
         return mixinTemplate.findAll(Issue::class.java)
             .find {
                 it.id == id
@@ -33,40 +34,16 @@ class Store(
     )
 
     /**
-     * A retrieval result, indicating whether the entity already existed or was newly created.
-     */
-    data class RetrieveOrCreate<T>(
-        val entity: T,
-        val existing: Boolean,
-    )
-
-    /**
-     * Retrieve or create an entity of the given type.
-     * Do not save the new entity
-     */
-    @Transactional
-    fun <T> retrieveOrCreate(
-        retriever: () -> T?,
-        creator: () -> T,
-    ): RetrieveOrCreate<T> {
-        val existing = retriever()
-        if (existing != null) {
-            return RetrieveOrCreate(entity = existing, existing = true)
-        }
-        return RetrieveOrCreate(entity = creator(), existing = false)
-    }
-
-    /**
      * Retrieve an existing employer by company name, or create a new one.
      * Uses the configured EmployerCanonicalizer for matching.
      */
     @Transactional
-    fun retrieveOrCreateEmployer(companyName: String?): RetrieveOrCreate<Employer>? {
+    fun retrieveOrCreateEmployer(companyName: String?): EntityStatus<Employer>? {
         if (companyName.isNullOrBlank()) {
             return null
         }
 
-        return retrieveOrCreate(
+        return EntityStatus.retrieveOrCreate(
             {
                 // Find employer using the canonicalizer's matching logic
                 mixinTemplate.findAll(Employer::class.java)
@@ -90,10 +67,10 @@ class Store(
      * Do not save the person as we may further change it within this transaction
      */
     @Transactional
-    fun retrieveOrCreatePersonFrom(ghUser: GHUser): RetrieveOrCreate<Person> {
+    fun retrieveOrCreatePersonFrom(ghUser: GHUser): EntityStatus<Person> {
         val employer = retrieveOrCreateEmployer(ghUser.company)
 
-        return retrieveOrCreate({
+        return EntityStatus.retrieveOrCreate({
             // TODO inefficient. Improve when we have proper querying
             mixinTemplate.findAll(Person::class.java)
                 .find { it.githubId == ghUser.id }
@@ -120,13 +97,13 @@ class Store(
         }
         val saved = mixinTemplate.save(issue)
 
-        val personRetrieval = retrieveOrCreatePersonFrom(ghIssue.user)
-        val raisableIssue = RaisableIssue.from(saved, personRetrieval.entity)
+        val personStatus = retrieveOrCreatePersonFrom(ghIssue.user)
+        val raisableIssue = RaisableIssue.from(saved, personStatus.entity)
         mixinTemplate.save(raisableIssue)
 
         return IssueStorageResult(
             issue = raisableIssue,
-            newPerson = if (personRetrieval.existing) null else personRetrieval.entity,
+            newPerson = if (personStatus.created) personStatus.entity else null,
         )
     }
 

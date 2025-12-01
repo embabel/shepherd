@@ -75,7 +75,7 @@ class StoreTest {
             val result = store.retrieveOrCreateEmployer("Google")
 
             assertNotNull(result)
-            assertFalse(result!!.existing)
+            assertTrue(result!!.created)
             assertEquals("Google", result.entity.name)
         }
 
@@ -87,7 +87,7 @@ class StoreTest {
             val result = store.retrieveOrCreateEmployer("Google")
 
             assertNotNull(result)
-            assertTrue(result!!.existing)
+            assertFalse(result!!.created)
             assertEquals(existingEmployer.uuid, result.entity.uuid)
         }
 
@@ -99,7 +99,7 @@ class StoreTest {
             val result = store.retrieveOrCreateEmployer("google")
 
             assertNotNull(result)
-            assertTrue(result!!.existing)
+            assertFalse(result!!.created)
             assertEquals(existingEmployer.uuid, result.entity.uuid)
         }
 
@@ -111,7 +111,7 @@ class StoreTest {
             val result = store.retrieveOrCreateEmployer("GOOGLE")
 
             assertNotNull(result)
-            assertTrue(result!!.existing)
+            assertFalse(result!!.created)
             assertEquals(existingEmployer.uuid, result.entity.uuid)
         }
 
@@ -121,15 +121,15 @@ class StoreTest {
             employers.add(existingEmployer)
 
             val resultInc = store.retrieveOrCreateEmployer("Google Inc")
-            assertTrue(resultInc!!.existing)
+            assertFalse(resultInc!!.created)
             assertEquals(existingEmployer.uuid, resultInc.entity.uuid)
 
             val resultLlc = store.retrieveOrCreateEmployer("Google LLC")
-            assertTrue(resultLlc!!.existing)
+            assertFalse(resultLlc!!.created)
             assertEquals(existingEmployer.uuid, resultLlc.entity.uuid)
 
             val resultCorp = store.retrieveOrCreateEmployer("Google Corporation")
-            assertTrue(resultCorp!!.existing)
+            assertFalse(resultCorp!!.created)
             assertEquals(existingEmployer.uuid, resultCorp.entity.uuid)
         }
 
@@ -144,7 +144,7 @@ class StoreTest {
             val result = store.retrieveOrCreateEmployer("Google")
 
             assertNotNull(result)
-            assertTrue(result!!.existing)
+            assertFalse(result!!.created)
             assertEquals(existingEmployer.uuid, result.entity.uuid)
         }
 
@@ -159,7 +159,7 @@ class StoreTest {
             val result = store.retrieveOrCreateEmployer("Facebook Inc.")
 
             assertNotNull(result)
-            assertTrue(result!!.existing)
+            assertFalse(result!!.created)
             assertEquals(existingEmployer.uuid, result.entity.uuid)
         }
 
@@ -168,7 +168,7 @@ class StoreTest {
             val result = store.retrieveOrCreateEmployer("Acme Inc.")
 
             assertNotNull(result)
-            assertFalse(result!!.existing)
+            assertTrue(result!!.created)
             assertEquals("Acme Inc.", result.entity.name)
             assertTrue(result.entity.aliases.contains("acme"))
         }
@@ -178,7 +178,7 @@ class StoreTest {
             val result = store.retrieveOrCreateEmployer("google")
 
             assertNotNull(result)
-            assertFalse(result!!.existing)
+            assertTrue(result!!.created)
             assertEquals("google", result.entity.name)
             assertTrue(result.entity.aliases.isEmpty())
         }
@@ -200,7 +200,7 @@ class StoreTest {
 
             for (input in inputs) {
                 val result = store.retrieveOrCreateEmployer(input)
-                assertTrue(result!!.existing, "Expected existing for input: $input")
+                assertFalse(result!!.created, "Expected existing for input: $input")
                 assertEquals(existingEmployer.uuid, result.entity.uuid, "UUID mismatch for input: $input")
             }
         }
@@ -229,7 +229,7 @@ class StoreTest {
 
             val result = store.retrieveOrCreatePersonFrom(ghUser)
 
-            assertFalse(result.existing)
+            assertTrue(result.created)
             assertEquals("Test User", result.entity.name)
             assertEquals("A test bio", result.entity.bio)
             assertEquals(12345L, result.entity.githubId)
@@ -242,7 +242,7 @@ class StoreTest {
 
             val result = store.retrieveOrCreatePersonFrom(ghUser)
 
-            assertFalse(result.existing)
+            assertTrue(result.created)
             assertEquals("cooldev", result.entity.name)
         }
 
@@ -260,7 +260,7 @@ class StoreTest {
 
             val result = store.retrieveOrCreatePersonFrom(ghUser)
 
-            assertTrue(result.existing)
+            assertFalse(result.created)
             assertEquals(existingPerson.uuid, result.entity.uuid)
             assertEquals("Existing User", result.entity.name) // Original name preserved
         }
@@ -271,7 +271,7 @@ class StoreTest {
 
             val result = store.retrieveOrCreatePersonFrom(ghUser)
 
-            assertFalse(result.existing)
+            assertTrue(result.created)
             assertNotNull(result.entity.employer)
             assertEquals("Google", result.entity.employer?.name)
         }
@@ -285,7 +285,7 @@ class StoreTest {
 
             val result = store.retrieveOrCreatePersonFrom(ghUser)
 
-            assertFalse(result.existing)
+            assertTrue(result.created)
             assertNotNull(result.entity.employer)
             assertEquals(existingEmployer.uuid, result.entity.employer?.uuid)
         }
@@ -302,7 +302,7 @@ class StoreTest {
 
             val result = store.retrieveOrCreatePersonFrom(ghUser)
 
-            assertFalse(result.existing)
+            assertTrue(result.created)
             assertNotNull(result.entity.employer)
             assertEquals(existingEmployer.uuid, result.entity.employer?.uuid)
         }
@@ -313,7 +313,7 @@ class StoreTest {
 
             val result = store.retrieveOrCreatePersonFrom(ghUser)
 
-            assertFalse(result.existing)
+            assertTrue(result.created)
             assertNull(result.entity.employer)
         }
 
@@ -323,7 +323,7 @@ class StoreTest {
 
             val result = store.retrieveOrCreatePersonFrom(ghUser)
 
-            assertFalse(result.existing)
+            assertTrue(result.created)
             assertNull(result.entity.employer)
         }
 
@@ -344,23 +344,23 @@ class StoreTest {
         fun `should return existing entity when found`() {
             val existing = "existing value"
 
-            val result = store.retrieveOrCreate(
+            val result = EntityStatus.retrieveOrCreate(
                 retriever = { existing },
                 creator = { "new value" }
             )
 
-            assertTrue(result.existing)
+            assertFalse(result.created)
             assertEquals("existing value", result.entity)
         }
 
         @Test
         fun `should create new entity when not found`() {
-            val result = store.retrieveOrCreate(
+            val result = EntityStatus.retrieveOrCreate(
                 retriever = { null },
                 creator = { "new value" }
             )
 
-            assertFalse(result.existing)
+            assertTrue(result.created)
             assertEquals("new value", result.entity)
         }
 
@@ -368,7 +368,7 @@ class StoreTest {
         fun `should not call creator when entity exists`() {
             var creatorCalled = false
 
-            store.retrieveOrCreate(
+            EntityStatus.retrieveOrCreate(
                 retriever = { "existing" },
                 creator = {
                     creatorCalled = true
