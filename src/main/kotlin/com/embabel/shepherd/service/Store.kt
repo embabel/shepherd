@@ -12,6 +12,7 @@ import java.util.*
 @Service
 class Store(
     val mixinTemplate: MixinTemplate,
+    private val employerCanonicalizer: EmployerCanonicalizer = RegexEmployerCanonicalizer(),
 ) {
 
     @Transactional(readOnly = true)
@@ -57,7 +58,7 @@ class Store(
 
     /**
      * Retrieve an existing employer by company name, or create a new one.
-     * Uses case-insensitive matching and company alias resolution.
+     * Uses the configured EmployerCanonicalizer for matching.
      */
     @Transactional
     fun retrieveOrCreateEmployer(companyName: String?): RetrieveOrCreate<Employer>? {
@@ -67,16 +68,16 @@ class Store(
 
         return retrieveOrCreate(
             {
-                // Find employer using case-insensitive matching with alias support
+                // Find employer using the canonicalizer's matching logic
                 mixinTemplate.findAll(Employer::class.java)
-                    .find { it.matches(companyName) }
+                    .find { employerCanonicalizer.matches(companyName, it) }
             }
         ) {
             // Create new employer with the original company name as canonical
             // Add normalized variant as alias if different from the original
-            val normalized = Employer.canonicalize(companyName)
-            val aliases = if (normalized != companyName.lowercase()) {
-                setOf(normalized)
+            val canonical = employerCanonicalizer.canonicalize(companyName)
+            val aliases = if (canonical != companyName.lowercase()) {
+                setOf(canonical)
             } else {
                 emptySet()
             }

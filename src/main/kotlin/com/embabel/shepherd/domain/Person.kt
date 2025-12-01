@@ -7,33 +7,7 @@ data class Employer(
     val name: String,
     val aliases: Set<String> = emptySet(),
     override val uuid: UUID = UUID.randomUUID(),
-) : HasUUID {
-
-    /**
-     * Check if the given company name matches this employer.
-     * Matches against the canonical name or any alias, case-insensitively.
-     */
-    fun matches(companyName: String): Boolean {
-        val normalizedInput = canonicalize(companyName)
-        return canonicalize(name) == normalizedInput ||
-                aliases.any { canonicalize(it) == normalizedInput }
-    }
-
-    companion object {
-        /**
-         * Normalize a company name for comparison.
-         * Converts to lowercase and removes common suffixes and punctuation.
-         */
-        fun canonicalize(companyName: String): String {
-            return companyName
-                .trim()
-                .lowercase()
-                .replace(Regex("""[.,]"""), "") // Remove punctuation
-                .replace(Regex("""\s+(inc|llc|ltd|corp|corporation|company|co)$"""), "") // Remove suffixes
-                .trim()
-        }
-    }
-}
+) : HasUUID
 
 interface Person : HasUUID {
     val name: String
