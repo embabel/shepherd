@@ -38,6 +38,11 @@
         <appender-ref ref="FILE"/>
     </logger>
 
+    <logger name="com.embabel.sherlock" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE_SHEPHERD"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
     <!-- Root: INFO to file, WARN to console -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

@@ -61,7 +61,7 @@ class PersonPersistenceTest {
 
         template.save(person)
 
-        val ids = template.listIds("PersonImpl")
+        val ids = template.listIds("Person")
         assertEquals(1, ids.size)
         assertEquals(person.uuid.toString(), ids[0])
     }
@@ -82,7 +82,7 @@ class PersonPersistenceTest {
 
         template.save(person)
 
-        val ids = template.listIds("PersonImpl")
+        val ids = template.listIds("Person")
         assertEquals(1, ids.size)
 
         // Retrieve using findAll and verify Organization is intact
@@ -146,7 +146,7 @@ class PersonPersistenceTest {
         template.save(person2)
 
         // Verify we have 2 persons
-        val personIds = template.listIds("PersonImpl")
+        val personIds = template.listIds("Person")
         assertEquals(2, personIds.size)
 
         // Verify we have only 1 employer (saved once)
@@ -209,11 +209,11 @@ class PersonPersistenceTest {
 
         template.save(issue)
 
-        // Verify it's saved under IssueImpl directory
-        val implIds = template.listIds("IssueImpl")
+        // Verify it's saved under Issue directory
+        val implIds = template.listIds("Issue")
         assertEquals(1, implIds.size)
 
-        // Query by Issue interface - should find the IssueImpl
+        // Query by Issue interface - should find the Issue
         val allIssues = template.findAll<Issue>().toList()
         assertEquals(1, allIssues.size)
 
@@ -389,7 +389,7 @@ class PersonPersistenceTest {
         val retrievedWithProfile = allPersonsWithProfile[0]
         assertEquals(profile.bio, retrievedWithProfile.profile.bio)
 
-        // Person queried directly should also be found (stored as PersonImpl)
+        // Person queried directly should also be found (stored as Person)
         val allPersons = template.findAll<Person>().toList()
         assertEquals(1, allPersons.size)
     }
@@ -566,11 +566,11 @@ class PersonPersistenceTest {
 
         template.save(pr)
 
-        // Verify it's saved under PullRequestImpl directory
-        val implIds = template.listIds("PullRequestImpl")
+        // Verify it's saved under PullRequest directory
+        val implIds = template.listIds("PullRequest")
         assertEquals(1, implIds.size)
 
-        // Query by PullRequest interface - should find the PullRequestImpl
+        // Query by PullRequest interface - should find the PullRequest
         val allPrs = template.findAll<PullRequest>().toList()
         assertEquals(1, allPrs.size)
 

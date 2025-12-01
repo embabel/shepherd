@@ -11,7 +11,7 @@ class EntityStatusTest {
 
         val result = EntityStatus.retrieveOrCreate(
             retriever = { existing },
-            creator = { "new value" }
+            creator = { NewEntity("new value", emptyList()) }
         )
 
         assertFalse(result.created)
@@ -22,7 +22,7 @@ class EntityStatusTest {
     fun `should create new entity when not found`() {
         val result = EntityStatus.retrieveOrCreate(
             retriever = { null },
-            creator = { "new value" }
+            creator = { NewEntity("new value", emptyList()) }
         )
 
         assertTrue(result.created)
@@ -37,7 +37,7 @@ class EntityStatusTest {
             retriever = { "existing" },
             creator = {
                 creatorCalled = true
-                "new"
+                NewEntity("new", emptyList())
             }
         )
 
@@ -45,14 +45,26 @@ class EntityStatusTest {
     }
 
     @Test
-    fun `should have correct created flag for new entity`() {
-        val result = EntityStatus(entity = "test", created = true)
+    fun `NewEntity should have created flag true`() {
+        val result = NewEntity(entity = "test", otherNewEntities = emptyList())
         assertTrue(result.created)
     }
 
     @Test
-    fun `should have correct created flag for existing entity`() {
-        val result = EntityStatus(entity = "test", created = false)
+    fun `ExistingEntity should have created flag false`() {
+        val result = ExistingEntity(entity = "test")
         assertFalse(result.created)
+    }
+
+    @Test
+    fun `NewEntity should include entity in newEntities list`() {
+        val result = NewEntity(entity = "main", otherNewEntities = listOf("other1", "other2"))
+        assertEquals(listOf("main", "other1", "other2"), result.newEntities)
+    }
+
+    @Test
+    fun `ExistingEntity should have empty newEntities list`() {
+        val result = ExistingEntity(entity = "test")
+        assertTrue(result.newEntities.isEmpty())
     }
 }

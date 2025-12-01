@@ -588,12 +588,34 @@ class FileMixinTemplate(
      * Lists all entity IDs stored for a given type as strings.
      */
     fun listIds(typeName: String): List<String> {
-        val typeDir = baseDir.resolve(typeName).toFile()
-        if (!typeDir.exists()) return emptyList()
+        val results = mutableListOf<String>()
 
-        return typeDir.listFiles { file -> file.extension == "json" }
-            ?.map { it.nameWithoutExtension }
-            ?: emptyList()
+        // First check direct type directory
+        val typeDir = baseDir.resolve(typeName).toFile()
+        if (typeDir.exists()) {
+            typeDir.listFiles { file -> file.extension == "json" }
+                ?.map { it.nameWithoutExtension }
+                ?.let { results.addAll(it) }
+        }
+
+        // Also search entities directory by label for interface types
+        val entitiesDir = baseDir.resolve("entities").toFile()
+        if (entitiesDir.exists()) {
+            entitiesDir.listFiles { file -> file.extension == "json" }?.forEach { file ->
+                try {
+                    val jsonNode = objectMapper.readTree(file) as ObjectNode
+                    val labels = (jsonNode.get("_labels") as? ArrayNode)
+                        ?.map { it.asText() }?.toSet() ?: emptySet()
+                    if (typeName in labels && file.nameWithoutExtension !in results) {
+                        results.add(file.nameWithoutExtension)
+                    }
+                } catch (_: Exception) {
+                    // Skip files that can't be parsed
+                }
+            }
+        }
+
+        return results
     }
 }
 

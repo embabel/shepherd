@@ -1,7 +1,6 @@
 package com.embabel.shepherd.service
 
 import com.embabel.shepherd.domain.Employer
-import com.embabel.shepherd.domain.HasUUID
 import com.embabel.shepherd.domain.Person
 import io.mockk.every
 import io.mockk.mockk
@@ -40,6 +39,7 @@ class CommunityDataManagerTest {
                         employers.removeIf { it.uuid == entity.uuid }
                         employers.add(entity)
                     }
+
                     is Person -> {
                         persons.removeIf { it.uuid == entity.uuid }
                         persons.add(entity)

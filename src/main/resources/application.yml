@@ -52,6 +52,9 @@ sherlock:
     - competitor
     - contributor
     - user
+    - student
+    - manager
+    - developer
 
 database:
   dataSources:

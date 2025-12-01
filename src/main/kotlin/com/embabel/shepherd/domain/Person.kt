@@ -3,12 +3,6 @@ package com.embabel.shepherd.domain
 import java.util.*
 
 
-data class Employer(
-    val name: String,
-    val aliases: Set<String> = emptySet(),
-    override val uuid: UUID = UUID.randomUUID(),
-) : HasUUID
-
 interface Person : HasUUID {
     val name: String
     val bio: String?
