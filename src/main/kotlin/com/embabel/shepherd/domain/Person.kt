@@ -6,7 +6,7 @@ import java.util.*
 interface Person : HasUUID {
     val name: String
     val bio: String?
-    val githubId: Long?
+    val githubLogin: String?
     val employer: Employer?
 
     companion object {
@@ -15,13 +15,13 @@ interface Person : HasUUID {
             uuid: UUID = UUID.randomUUID(),
             name: String,
             bio: String? = null,
-            githubId: Long? = null,
+            githubLogin: String? = null,
             employer: Employer? = null,
         ): Person = PersonImpl(
             uuid = uuid,
             name = name,
             bio = bio,
-            githubId = githubId,
+            githubLogin = githubLogin,
             employer = employer,
         )
     }
@@ -31,7 +31,7 @@ internal data class PersonImpl(
     override val uuid: UUID,
     override val name: String,
     override val bio: String?,
-    override val githubId: Long?,
+    override val githubLogin: String?,
     override val employer: Employer?,
 ) : Person
 

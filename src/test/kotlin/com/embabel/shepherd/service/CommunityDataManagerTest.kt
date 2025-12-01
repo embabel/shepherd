@@ -232,7 +232,7 @@ class CommunityDataManagerTest {
             assertTrue(result.created)
             assertEquals("Test User", result.entity.name)
             assertEquals("A test bio", result.entity.bio)
-            assertEquals(12345L, result.entity.githubId)
+            assertEquals("testuser", result.entity.githubLogin)
             assertNull(result.entity.employer)
         }
 
@@ -252,7 +252,7 @@ class CommunityDataManagerTest {
                 uuid = UUID.randomUUID(),
                 name = "Existing User",
                 bio = "Old bio",
-                githubId = 12345L
+                githubLogin = "testuser"
             )
             persons.add(existingPerson)
 

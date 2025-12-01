@@ -4,6 +4,7 @@ import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.Ai
 import com.embabel.agent.core.CoreToolGroups
+import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Employer
 import com.embabel.shepherd.domain.Person
 import com.embabel.shepherd.service.CommunityDataManager
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory
 @EmbabelComponent
 class ResearchActions(
     val properties: SherlockProperties,
+    private val shepherdProperties: ShepherdProperties,
     private val communityDataManager: CommunityDataManager,
 ) {
 
@@ -34,7 +36,7 @@ class ResearchActions(
     fun researchPerson(
         newEntity: NewEntity<*>,
         ai: Ai
-    ) {
+    ): PersonWithProfile {
         val person = newEntity.newEntities.filterIsInstance<Person>().first()
         logger.info(
             "Researching person {}",
@@ -54,6 +56,7 @@ class ResearchActions(
                 mapOf(
                     "person" to person,
                     "properties" to properties,
+                    "shepherdProperties" to shepherdProperties,
                 ),
             )
         logger.info(
@@ -61,7 +64,7 @@ class ResearchActions(
             person.name,
             profile,
         )
-        communityDataManager.save(PersonWithProfile.from(person, profile))
+        return communityDataManager.save(PersonWithProfile.from(person, profile))
     }
 
     @Action(
@@ -72,7 +75,7 @@ class ResearchActions(
     fun researchCompany(
         newEntity: NewEntity<*>,
         ai: Ai,
-    ) {
+    ): EmployerWithProfile {
         val employer = newEntity.newEntities.filterIsInstance<Employer>().first()
         logger.info(
             "Researching employer {}",
@@ -98,7 +101,7 @@ class ResearchActions(
             profile,
         )
 
-        communityDataManager.save(EmployerWithProfile.from(employer, profile))
+        return communityDataManager.save(EmployerWithProfile.from(employer, profile))
     }
 
 }

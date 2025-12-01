@@ -80,14 +80,14 @@ class CommunityDataManager(
         return EntityStatus.retrieveOrCreate({
             // TODO inefficient. Improve when we have proper querying
             mixinTemplate.findAll(Person::class.java)
-                .find { it.githubId == ghUser.id }
+                .find { it.githubLogin == ghUser.login }
         }) {
             NewEntity(
                 Person(
                     uuid = UUID.randomUUID(),
                     name = ghUser.name ?: ghUser.login,
                     bio = ghUser.bio ?: "",
-                    githubId = ghUser.id,
+                    githubLogin = ghUser.login,
                     employer = employerStatus?.entity,
                 ),
                 otherNewEntities = employerStatus?.newEntities ?: emptyList(),

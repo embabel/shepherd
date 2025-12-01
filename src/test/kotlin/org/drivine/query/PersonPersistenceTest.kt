@@ -55,7 +55,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Alice",
             bio = "Software engineer",
-            githubId = 123L,
+            githubLogin = "alice123",
             employer = null
         )
 
@@ -76,7 +76,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Bob",
             bio = "Developer",
-            githubId = 456L,
+            githubLogin = "bob456",
             employer = org
         )
 
@@ -93,7 +93,7 @@ class PersonPersistenceTest {
         assertEquals(person.uuid, retrieved.uuid)
         assertEquals(person.name, retrieved.name)
         assertEquals(person.bio, retrieved.bio)
-        assertEquals(person.githubId, retrieved.githubId)
+        assertEquals(person.githubLogin, retrieved.githubLogin)
 
         // Verify Organization is correctly persisted and retrieved
         assertNotNull(retrieved.employer)
@@ -126,7 +126,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Charlie",
             bio = "Engineer",
-            githubId = 123L,
+            githubLogin = "alice123",
             employer = sharedOrg
         )
 
@@ -134,7 +134,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Diana",
             bio = "Designer",
-            githubId = 456L,
+            githubLogin = "bob456",
             employer = sharedOrg
         )
 
@@ -175,7 +175,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Eve",
             bio = "Architect",
-            githubId = 789L,
+            githubLogin = "eve789",
             employer = null
         )
 
@@ -188,7 +188,7 @@ class PersonPersistenceTest {
         assertEquals(person.uuid, retrieved.uuid)
         assertEquals(person.name, retrieved.name)
         assertEquals(person.bio, retrieved.bio)
-        assertEquals(person.githubId, retrieved.githubId)
+        assertEquals(person.githubLogin, retrieved.githubLogin)
         assertNull(retrieved.employer)
     }
 
@@ -231,7 +231,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Alice",
             bio = null,
-            githubId = 111L,
+            githubLogin = "user111",
             employer = null
         )
         val org = Employer(
@@ -272,7 +272,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Reporter",
             bio = "Bug reporter",
-            githubId = 999L,
+            githubLogin = "reporter999",
             employer = null
         )
 
@@ -328,7 +328,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Developer",
             bio = "Writes code",
-            githubId = 777L,
+            githubLogin = "dev777",
             employer = null
         )
 
@@ -360,7 +360,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Developer",
             bio = "Writes code",
-            githubId = 888L,
+            githubLogin = "dev888",
             employer = null
         )
 
@@ -401,7 +401,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Reporter",
             bio = "Bug hunter",
-            githubId = 111L,
+            githubLogin = "user111",
             employer = null
         )
         template.save(person)
@@ -454,7 +454,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "New Contributor",
             bio = "Found a bug",
-            githubId = 12345L,
+            githubLogin = "newcontrib12345",
             employer = null
         )
 
@@ -478,7 +478,7 @@ class PersonPersistenceTest {
         val retrieved = allWithProfile[0]
         assertEquals(person.uuid, retrieved.uuid)
         assertEquals(person.name, retrieved.name)
-        assertEquals(person.githubId, retrieved.githubId)
+        assertEquals(person.githubLogin, retrieved.githubLogin)
         assertEquals(profile.bio, retrieved.profile.bio)
         assertEquals(profile.programmingLanguages, retrieved.profile.programmingLanguages)
         assertEquals(profile.frameworks, retrieved.profile.frameworks)
@@ -496,7 +496,7 @@ class PersonPersistenceTest {
             uuid = UUID.randomUUID(),
             name = "Developer",
             bio = "Writes code",
-            githubId = 222L,
+            githubLogin = "dev222",
             employer = null
         )
         template.save(person)
