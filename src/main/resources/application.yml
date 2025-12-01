@@ -41,40 +41,6 @@ shepherd:
     - duplicate
     - minor
 
-sherlock:
-  research-llm:
-    model: gpt-4.1-mini
-
-
-  person-profile-categories:
-    - promoter
-    - detractor
-    - competitor
-    - contributor
-    - user
-    - student
-    - manager
-    - developer
-
-  company-profile-categories:
-    - partner
-    - competitor
-    - user
-
-  industries:
-    - technology
-    - finance
-    - healthcare
-    - education
-    - retail
-    - manufacturing
-    - entertainment
-    - transportation
-    - energy
-    - telecommunications
-    - software
-    - other
-
 database:
   dataSources:
     neo:
