@@ -3,14 +3,14 @@ package com.embabel.shepherd.agent
 import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.shepherd.conf.ShepherdProperties
-import com.embabel.shepherd.service.Store
+import com.embabel.shepherd.service.CommunityDataManager
 import org.kohsuke.github.GHStargazer
 import org.slf4j.LoggerFactory
 
 @EmbabelComponent
 class StarActions(
     val properties: ShepherdProperties,
-    private val store: Store,
+    private val communityDataManager: CommunityDataManager,
 ) {
 
     private val logger = LoggerFactory.getLogger(StarActions::class.java)
@@ -30,10 +30,10 @@ class StarActions(
             starredAt
         )
 
-        val personStatus = store.retrieveOrCreatePersonFrom(user)
+        val personStatus = communityDataManager.retrieveOrCreatePersonFrom(user)
         if (personStatus.created) {
             logger.info("Created new person for stargazer: login='{}', name='{}'", user.login, user.name)
-            store.save(personStatus.entity)
+            communityDataManager.save(personStatus.entity)
             return NewPerson(personStatus.entity)
         }
         return null

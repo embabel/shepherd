@@ -8,7 +8,7 @@ import com.embabel.common.core.types.ZeroToOne
 import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.service.DummyGitHubUpdater
 import com.embabel.shepherd.service.GitHubUpdater
-import com.embabel.shepherd.service.Store
+import com.embabel.shepherd.service.CommunityDataManager
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
@@ -39,7 +39,7 @@ data class PullRequestAssessment(
 @EmbabelComponent
 class IssueActions(
     val properties: ShepherdProperties,
-    private val store: Store,
+    private val communityDataManager: CommunityDataManager,
     private val gitHubUpdater: GitHubUpdater = DummyGitHubUpdater,
 ) {
 
@@ -53,9 +53,9 @@ class IssueActions(
         outputBinding = "ghIssue"
     )
     fun saveNewIssue(ghIssue: GHIssue, context: OperationContext): GHIssue? {
-        val existing = store.findIssueByGithubId(ghIssue.id)
+        val existing = communityDataManager.findIssueByGithubId(ghIssue.id)
         if (existing == null) {
-            val issueStorageResult = store.saveAndExpandIssue(ghIssue)
+            val issueStorageResult = communityDataManager.saveAndExpandIssue(ghIssue)
             context += issueStorageResult
             logger.info("New issue found: #{}, title='{}'", ghIssue.number, ghIssue.title)
             return ghIssue
@@ -69,7 +69,7 @@ class IssueActions(
     )
     fun reactToNewIssue(
         ghIssue: GHIssue,
-        issueStorageResult: Store.IssueStorageResult,
+        issueStorageResult: CommunityDataManager.IssueStorageResult,
         ai: Ai
     ): IssueAssessment {
         logger.info(
@@ -105,7 +105,7 @@ class IssueActions(
     }
 
     @Action
-    fun publishNewPerson(issueStorageResult: Store.IssueStorageResult): NewPerson? {
+    fun publishNewPerson(issueStorageResult: CommunityDataManager.IssueStorageResult): NewPerson? {
         return issueStorageResult.newPerson?.let { NewPerson(it) }
     }
 
@@ -114,7 +114,7 @@ class IssueActions(
     )
     fun reactToNewPullRequest(
         ghIssue: GHPullRequest,
-        issueStorageResult: Store.IssueStorageResult,
+        issueStorageResult: CommunityDataManager.IssueStorageResult,
         ai: Ai,
     ): PullRequestAssessment {
         logger.info(

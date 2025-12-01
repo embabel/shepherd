@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
-class Store(
+class CommunityDataManager(
     val mixinTemplate: MixinTemplate,
     private val employerCanonicalizer: EmployerCanonicalizer = RegexEmployerCanonicalizer(),
 ) {

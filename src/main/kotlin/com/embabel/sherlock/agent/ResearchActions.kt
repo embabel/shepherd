@@ -5,7 +5,7 @@ import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.Ai
 import com.embabel.agent.core.CoreToolGroups
 import com.embabel.shepherd.agent.NewPerson
-import com.embabel.shepherd.service.Store
+import com.embabel.shepherd.service.CommunityDataManager
 import com.embabel.sherlock.conf.SherlockProperties
 import com.embabel.sherlock.domain.PersonWithProfile
 import com.embabel.sherlock.domain.Profile
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 @EmbabelComponent
 class ResearchActions(
     val properties: SherlockProperties,
-    private val store: Store,
+    private val communityDataManager: CommunityDataManager,
 ) {
 
     private val logger = LoggerFactory.getLogger(ResearchActions::class.java)
@@ -54,7 +54,7 @@ class ResearchActions(
             profile,
         )
 
-        store.save(PersonWithProfile.from(person, profile))
+        communityDataManager.save(PersonWithProfile.from(person, profile))
     }
 
 }

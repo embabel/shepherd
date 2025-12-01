@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test
 import org.kohsuke.github.GHUser
 import java.util.*
 
-class StoreTest {
+class CommunityDataManagerTest {
 
     private lateinit var mixinTemplate: MixinTemplate
-    private lateinit var store: Store
+    private lateinit var communityDataManager: CommunityDataManager
 
     // In-memory storage for the mock
     private val employers = mutableListOf<Employer>()
@@ -49,7 +49,7 @@ class StoreTest {
             }
         }
 
-        store = Store(mixinTemplate)
+        communityDataManager = CommunityDataManager(mixinTemplate)
     }
 
     @Nested
@@ -57,22 +57,22 @@ class StoreTest {
 
         @Test
         fun `should return null for null company name`() {
-            val result = store.retrieveOrCreateEmployer(null)
+            val result = communityDataManager.retrieveOrCreateEmployer(null)
             assertNull(result)
         }
 
         @Test
         fun `should return null for blank company name`() {
-            val result = store.retrieveOrCreateEmployer("")
+            val result = communityDataManager.retrieveOrCreateEmployer("")
             assertNull(result)
 
-            val resultSpaces = store.retrieveOrCreateEmployer("   ")
+            val resultSpaces = communityDataManager.retrieveOrCreateEmployer("   ")
             assertNull(resultSpaces)
         }
 
         @Test
         fun `should create new employer when none exists`() {
-            val result = store.retrieveOrCreateEmployer("Google")
+            val result = communityDataManager.retrieveOrCreateEmployer("Google")
 
             assertNotNull(result)
             assertTrue(result!!.created)
@@ -84,7 +84,7 @@ class StoreTest {
             val existingEmployer = Employer(name = "Google")
             employers.add(existingEmployer)
 
-            val result = store.retrieveOrCreateEmployer("Google")
+            val result = communityDataManager.retrieveOrCreateEmployer("Google")
 
             assertNotNull(result)
             assertFalse(result!!.created)
@@ -96,7 +96,7 @@ class StoreTest {
             val existingEmployer = Employer(name = "Google")
             employers.add(existingEmployer)
 
-            val result = store.retrieveOrCreateEmployer("google")
+            val result = communityDataManager.retrieveOrCreateEmployer("google")
 
             assertNotNull(result)
             assertFalse(result!!.created)
@@ -108,7 +108,7 @@ class StoreTest {
             val existingEmployer = Employer(name = "Google")
             employers.add(existingEmployer)
 
-            val result = store.retrieveOrCreateEmployer("GOOGLE")
+            val result = communityDataManager.retrieveOrCreateEmployer("GOOGLE")
 
             assertNotNull(result)
             assertFalse(result!!.created)
@@ -120,15 +120,15 @@ class StoreTest {
             val existingEmployer = Employer(name = "Google")
             employers.add(existingEmployer)
 
-            val resultInc = store.retrieveOrCreateEmployer("Google Inc")
+            val resultInc = communityDataManager.retrieveOrCreateEmployer("Google Inc")
             assertFalse(resultInc!!.created)
             assertEquals(existingEmployer.uuid, resultInc.entity.uuid)
 
-            val resultLlc = store.retrieveOrCreateEmployer("Google LLC")
+            val resultLlc = communityDataManager.retrieveOrCreateEmployer("Google LLC")
             assertFalse(resultLlc!!.created)
             assertEquals(existingEmployer.uuid, resultLlc.entity.uuid)
 
-            val resultCorp = store.retrieveOrCreateEmployer("Google Corporation")
+            val resultCorp = communityDataManager.retrieveOrCreateEmployer("Google Corporation")
             assertFalse(resultCorp!!.created)
             assertEquals(existingEmployer.uuid, resultCorp.entity.uuid)
         }
@@ -141,7 +141,7 @@ class StoreTest {
             )
             employers.add(existingEmployer)
 
-            val result = store.retrieveOrCreateEmployer("Google")
+            val result = communityDataManager.retrieveOrCreateEmployer("Google")
 
             assertNotNull(result)
             assertFalse(result!!.created)
@@ -156,7 +156,7 @@ class StoreTest {
             )
             employers.add(existingEmployer)
 
-            val result = store.retrieveOrCreateEmployer("Facebook Inc.")
+            val result = communityDataManager.retrieveOrCreateEmployer("Facebook Inc.")
 
             assertNotNull(result)
             assertFalse(result!!.created)
@@ -165,7 +165,7 @@ class StoreTest {
 
         @Test
         fun `should create employer with normalized alias when different from name`() {
-            val result = store.retrieveOrCreateEmployer("Acme Inc.")
+            val result = communityDataManager.retrieveOrCreateEmployer("Acme Inc.")
 
             assertNotNull(result)
             assertTrue(result!!.created)
@@ -175,7 +175,7 @@ class StoreTest {
 
         @Test
         fun `should create employer without alias when normalized equals lowercase name`() {
-            val result = store.retrieveOrCreateEmployer("google")
+            val result = communityDataManager.retrieveOrCreateEmployer("google")
 
             assertNotNull(result)
             assertTrue(result!!.created)
@@ -199,7 +199,7 @@ class StoreTest {
             )
 
             for (input in inputs) {
-                val result = store.retrieveOrCreateEmployer(input)
+                val result = communityDataManager.retrieveOrCreateEmployer(input)
                 assertFalse(result!!.created, "Expected existing for input: $input")
                 assertEquals(existingEmployer.uuid, result.entity.uuid, "UUID mismatch for input: $input")
             }
@@ -227,7 +227,7 @@ class StoreTest {
         fun `should create new person when none exists`() {
             val ghUser = mockGHUser()
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertTrue(result.created)
             assertEquals("Test User", result.entity.name)
@@ -240,7 +240,7 @@ class StoreTest {
         fun `should use login as name when name is null`() {
             val ghUser = mockGHUser(name = null, login = "cooldev")
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertTrue(result.created)
             assertEquals("cooldev", result.entity.name)
@@ -258,7 +258,7 @@ class StoreTest {
 
             val ghUser = mockGHUser(id = 12345L, name = "Updated Name")
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertFalse(result.created)
             assertEquals(existingPerson.uuid, result.entity.uuid)
@@ -269,7 +269,7 @@ class StoreTest {
         fun `should create person with new employer`() {
             val ghUser = mockGHUser(company = "Google")
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertTrue(result.created)
             assertNotNull(result.entity.employer)
@@ -283,7 +283,7 @@ class StoreTest {
 
             val ghUser = mockGHUser(company = "Google Inc")
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertTrue(result.created)
             assertNotNull(result.entity.employer)
@@ -300,7 +300,7 @@ class StoreTest {
 
             val ghUser = mockGHUser(company = "Google")
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertTrue(result.created)
             assertNotNull(result.entity.employer)
@@ -311,7 +311,7 @@ class StoreTest {
         fun `should handle null company`() {
             val ghUser = mockGHUser(company = null)
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertTrue(result.created)
             assertNull(result.entity.employer)
@@ -321,7 +321,7 @@ class StoreTest {
         fun `should handle blank company`() {
             val ghUser = mockGHUser(company = "   ")
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertTrue(result.created)
             assertNull(result.entity.employer)
@@ -331,52 +331,9 @@ class StoreTest {
         fun `should handle empty bio`() {
             val ghUser = mockGHUser(bio = null)
 
-            val result = store.retrieveOrCreatePersonFrom(ghUser)
+            val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
             assertEquals("", result.entity.bio)
-        }
-    }
-
-    @Nested
-    inner class RetrieveOrCreateTests {
-
-        @Test
-        fun `should return existing entity when found`() {
-            val existing = "existing value"
-
-            val result = EntityStatus.retrieveOrCreate(
-                retriever = { existing },
-                creator = { "new value" }
-            )
-
-            assertFalse(result.created)
-            assertEquals("existing value", result.entity)
-        }
-
-        @Test
-        fun `should create new entity when not found`() {
-            val result = EntityStatus.retrieveOrCreate(
-                retriever = { null },
-                creator = { "new value" }
-            )
-
-            assertTrue(result.created)
-            assertEquals("new value", result.entity)
-        }
-
-        @Test
-        fun `should not call creator when entity exists`() {
-            var creatorCalled = false
-
-            EntityStatus.retrieveOrCreate(
-                retriever = { "existing" },
-                creator = {
-                    creatorCalled = true
-                    "new"
-                }
-            )
-
-            assertFalse(creatorCalled)
         }
     }
 }
