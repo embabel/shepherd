@@ -6,12 +6,10 @@ import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.*
 import com.embabel.shepherd.service.IssueReader
 import com.embabel.shepherd.service.RepoId
-import com.embabel.sherlock.domain.PersonWithProfile
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.drivine.query.FileMixinTemplate
 import org.drivine.query.MixinTemplate
 import org.drivine.query.findAll
-import org.drivine.query.findById
 import org.kohsuke.github.GHIssueState
 import org.springframework.shell.standard.ShellComponent
 import org.springframework.shell.standard.ShellMethod
@@ -72,11 +70,6 @@ class ShepherdShell(
         val issues = mixinTemplate.findAll<RaisableIssue>()
         for (issue in issues) {
             println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(issue))
-            val deep = mixinTemplate.findById<PersonWithProfile>(issue.raisedBy.uuid.toString())
-            println(
-                "Profile: " + objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(deep)
-            )
         }
     }
 
