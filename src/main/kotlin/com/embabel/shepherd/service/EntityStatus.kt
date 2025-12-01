@@ -37,7 +37,7 @@ sealed interface EntityStatus<T : Any> {
  */
 data class NewEntity<T : Any>(
     override val entity: T,
-    val otherNewEntities: List<Any>,
+    private val otherNewEntities: List<Any>,
 ) : EntityStatus<T> {
     override val created: Boolean = true
 

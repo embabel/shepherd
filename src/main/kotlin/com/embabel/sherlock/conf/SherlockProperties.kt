@@ -5,10 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 /**
  * Configuration properties for Sherlock
- *  @param profileCategories Set of profile categories to use in Shepherd, such as "friend", "foo"
+ *  @param personProfileCategories Set of profile categories to use in Shepherd, such as "friend", "foo"
  */
 @ConfigurationProperties(prefix = "sherlock")
 data class SherlockProperties(
     val researchLLm: LlmOptions,
-    val profileCategories: Set<String>,
+    val personProfileCategories: Set<String>,
+    val companyProfileCategories: Set<String>,
+    val industries: Set<String>,
 )

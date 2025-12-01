@@ -75,7 +75,7 @@ class CommunityDataManager(
      */
     @Transactional
     fun retrieveOrCreatePersonFrom(ghUser: GHUser): EntityStatus<Person> {
-        val employer = retrieveOrCreateEmployer(ghUser.company)
+        val employerStatus = retrieveOrCreateEmployer(ghUser.company)
 
         return EntityStatus.retrieveOrCreate({
             // TODO inefficient. Improve when we have proper querying
@@ -88,8 +88,9 @@ class CommunityDataManager(
                     name = ghUser.name ?: ghUser.login,
                     bio = ghUser.bio ?: "",
                     githubId = ghUser.id,
-                    employer = employer?.entity,
-                ), listOfNotNull(employer)
+                    employer = employerStatus?.entity,
+                ),
+                otherNewEntities = employerStatus?.newEntities ?: emptyList(),
             )
         }
     }
@@ -114,10 +115,8 @@ class CommunityDataManager(
         } else {
             Issue.fromGHIssue(ghIssue, repository)
         }
-        val saved = mixinTemplate.save(issue)
-
         val personStatus = retrieveOrCreatePersonFrom(ghIssue.user)
-        val raisableIssue = RaisableIssue.from(saved, personStatus.entity)
+        val raisableIssue = RaisableIssue.from(issue, personStatus.entity)
         mixinTemplate.save(raisableIssue)
 
         return NewEntity(

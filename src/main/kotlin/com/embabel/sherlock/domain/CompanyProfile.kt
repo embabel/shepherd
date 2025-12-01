@@ -12,7 +12,8 @@ data class CompanyProfile(
     val updated: Instant = Instant.now(),
     val description: String,
     val homepage: String,
-    // TODO industry etc.
+    val industry: String,
+    val categories: Set<String>,
 
     // TODO is hobbyist or real
 ) : HasUUID

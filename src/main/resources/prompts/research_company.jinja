@@ -2,8 +2,21 @@ Use web tools to research the given company
 Also use github tools, very thoroughly
 
 Be thorough. Try to find their web site if possible.
+Read it using the fetch tool.
 
-Here's what we know about them:
+Notes on fields:
+
+- categories: categories relevant to this company, from the following list:
+{% for category in properties.companyProfileCategories %}
+    - {{ category }}
+{% endfor %}
+
+- industry: the industry this company is in, from the following list:
+{% for industry in properties.industries %}
+    - {{ industry }}
+{% endfor %}
+
+Here's what we know about this company, in the context of users of the Embabel agent framework:
 
 {{ company }}
 

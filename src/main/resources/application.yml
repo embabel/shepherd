@@ -46,7 +46,7 @@ sherlock:
     model: gpt-4.1-mini
 
 
-  profile-categories:
+  person-profile-categories:
     - promoter
     - detractor
     - competitor
@@ -55,6 +55,25 @@ sherlock:
     - student
     - manager
     - developer
+
+  company-profile-categories:
+    - partner
+    - competitor
+    - user
+
+  industries:
+    - technology
+    - finance
+    - healthcare
+    - education
+    - retail
+    - manufacturing
+    - entertainment
+    - transportation
+    - energy
+    - telecommunications
+    - software
+    - other
 
 database:
   dataSources:

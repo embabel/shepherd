@@ -57,7 +57,7 @@ class ResearchActions(
                 ),
             )
         logger.info(
-            "Researched person name='{}', profile='{}'",
+            "Researched person name='{}', profile=\n{}",
             person.name,
             profile,
         )
@@ -83,8 +83,6 @@ class ResearchActions(
             .withLlm(properties.researchLLm)
             .withId("company_research")
             .withTools(CoreToolGroups.WEB)
-            // TODO restore this
-//            .withToolObject(GitHubUserTools(newPerson.person.githubId))
             .withoutProperties("uuid", "updated")
             .creating(CompanyProfile::class.java)
             .fromTemplate(
@@ -95,7 +93,7 @@ class ResearchActions(
                 ),
             )
         logger.info(
-            "Researched company name='{}', profile='{}'",
+            "Researched company name='{}', profile=\n{}",
             employer.name,
             profile,
         )
