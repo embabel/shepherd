@@ -1,6 +1,6 @@
 package com.embabel.sherlock.service
 
-import com.embabel.sherlock.domain.EmployerWithProfile
+import com.embabel.sherlock.domain.OrganizationWithProfile
 import com.embabel.sherlock.domain.PersonWithProfile
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -23,7 +23,7 @@ class LoggingCRMPublisher : CRMPublisher {
         )
     }
 
-    override fun publishEmployer(employerWithProfile: EmployerWithProfile) {
+    override fun publishEmployer(employerWithProfile: OrganizationWithProfile) {
         logger.info(
             "*********** Publishing employer to CRM: name='{}', industry='{}', categories={}",
             employerWithProfile.name,

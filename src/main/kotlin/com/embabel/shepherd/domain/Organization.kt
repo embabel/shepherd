@@ -2,7 +2,10 @@ package com.embabel.shepherd.domain
 
 import java.util.*
 
-interface Employer : HasUUID {
+/**
+ * Not a github organization, but an actual organization (company, non-profit, etc.)
+ */
+interface Organization : HasUUID {
     val name: String
     val aliases: Set<String>
 
@@ -12,7 +15,7 @@ interface Employer : HasUUID {
             name: String,
             aliases: Set<String> = emptySet(),
             uuid: UUID = UUID.randomUUID(),
-        ): Employer = EmployerImpl(
+        ): Organization = OrganizationImpl(
             name = name,
             aliases = aliases,
             uuid = uuid,
@@ -20,8 +23,8 @@ interface Employer : HasUUID {
     }
 }
 
-internal data class EmployerImpl(
+internal data class OrganizationImpl(
     override val name: String,
     override val aliases: Set<String>,
     override val uuid: UUID,
-) : Employer
+) : Organization

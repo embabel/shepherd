@@ -1,6 +1,6 @@
 package com.embabel.shepherd.service
 
-import com.embabel.shepherd.domain.Employer
+import com.embabel.shepherd.domain.Organization
 
 /**
  * Strategy interface for canonicalizing employer/company names.
@@ -10,25 +10,25 @@ import com.embabel.shepherd.domain.Employer
  * - External API lookups (e.g., Clearbit, LinkedIn)
  * - Custom alias databases
  */
-interface EmployerCanonicalizer {
+interface OrganizationCanonicalizer {
 
     /**
      * Canonicalize a company name for comparison.
-     * @param companyName The raw company name
+     * @param organizationName The raw company name
      * @return A normalized/canonical form suitable for matching
      */
-    fun canonicalize(companyName: String): String
+    fun canonicalize(organizationName: String): String
 
     /**
      * Check if a company name matches an existing employer.
      * @param companyName The company name to check
-     * @param employer The employer to match against
+     * @param organization The employer to match against
      * @return true if the company name matches the employer
      */
-    fun matches(companyName: String, employer: Employer): Boolean {
+    fun matches(companyName: String, organization: Organization): Boolean {
         val canonicalInput = canonicalize(companyName)
-        return canonicalize(employer.name) == canonicalInput ||
-                employer.aliases.any { canonicalize(it) == canonicalInput }
+        return canonicalize(organization.name) == canonicalInput ||
+                organization.aliases.any { canonicalize(it) == canonicalInput }
     }
 }
 
@@ -39,10 +39,10 @@ interface EmployerCanonicalizer {
  * - Removing punctuation (periods, commas)
  * - Removing common company suffixes (Inc, LLC, Ltd, Corp, etc.)
  */
-class RegexEmployerCanonicalizer : EmployerCanonicalizer {
+class RegexOrganizationCanonicalizer : OrganizationCanonicalizer {
 
-    override fun canonicalize(companyName: String): String {
-        return companyName
+    override fun canonicalize(organizationName: String): String {
+        return organizationName
             .trim()
             .lowercase()
             .replace(Regex("""[.,]"""), "") // Remove punctuation

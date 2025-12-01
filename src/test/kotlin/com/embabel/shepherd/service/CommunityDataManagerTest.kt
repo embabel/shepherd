@@ -1,6 +1,6 @@
 package com.embabel.shepherd.service
 
-import com.embabel.shepherd.domain.Employer
+import com.embabel.shepherd.domain.Organization
 import com.embabel.shepherd.domain.Person
 import io.mockk.every
 import io.mockk.mockk
@@ -19,25 +19,25 @@ class CommunityDataManagerTest {
     private lateinit var communityDataManager: CommunityDataManager
 
     // In-memory storage for the mock
-    private val employers = mutableListOf<Employer>()
+    private val organizations = mutableListOf<Organization>()
     private val persons = mutableListOf<Person>()
 
     @BeforeEach
     fun setUp() {
-        employers.clear()
+        organizations.clear()
         persons.clear()
 
         mixinTemplate = mockk {
-            every { findAll(Employer::class.java) } answers { employers.toList() }
+            every { findAll(Organization::class.java) } answers { organizations.toList() }
             every { findAll(Person::class.java) } answers { persons.toList() }
 
             val entitySlot = slot<Any>()
             every { save(capture(entitySlot)) } answers {
                 val entity = entitySlot.captured
                 when (entity) {
-                    is Employer -> {
-                        employers.removeIf { it.uuid == entity.uuid }
-                        employers.add(entity)
+                    is Organization -> {
+                        organizations.removeIf { it.uuid == entity.uuid }
+                        organizations.add(entity)
                     }
 
                     is Person -> {
@@ -53,7 +53,7 @@ class CommunityDataManagerTest {
     }
 
     @Nested
-    inner class RetrieveOrCreateEmployerTests {
+    inner class RetrieveOrCreateOrganizationTests {
 
         @Test
         fun `should return null for null company name`() {
@@ -81,86 +81,86 @@ class CommunityDataManagerTest {
 
         @Test
         fun `should find existing employer with exact match`() {
-            val existingEmployer = Employer(name = "Google")
-            employers.add(existingEmployer)
+            val existingOrganization = Organization(name = "Google")
+            organizations.add(existingOrganization)
 
             val result = communityDataManager.retrieveOrCreateEmployer("Google")
 
             assertNotNull(result)
             assertFalse(result!!.created)
-            assertEquals(existingEmployer.uuid, result.entity.uuid)
+            assertEquals(existingOrganization.uuid, result.entity.uuid)
         }
 
         @Test
         fun `should find existing employer case-insensitively`() {
-            val existingEmployer = Employer(name = "Google")
-            employers.add(existingEmployer)
+            val existingOrganization = Organization(name = "Google")
+            organizations.add(existingOrganization)
 
             val result = communityDataManager.retrieveOrCreateEmployer("google")
 
             assertNotNull(result)
             assertFalse(result!!.created)
-            assertEquals(existingEmployer.uuid, result.entity.uuid)
+            assertEquals(existingOrganization.uuid, result.entity.uuid)
         }
 
         @Test
         fun `should find existing employer with UPPERCASE input`() {
-            val existingEmployer = Employer(name = "Google")
-            employers.add(existingEmployer)
+            val existingOrganization = Organization(name = "Google")
+            organizations.add(existingOrganization)
 
             val result = communityDataManager.retrieveOrCreateEmployer("GOOGLE")
 
             assertNotNull(result)
             assertFalse(result!!.created)
-            assertEquals(existingEmployer.uuid, result.entity.uuid)
+            assertEquals(existingOrganization.uuid, result.entity.uuid)
         }
 
         @Test
         fun `should find existing employer when input has suffix`() {
-            val existingEmployer = Employer(name = "Google")
-            employers.add(existingEmployer)
+            val existingOrganization = Organization(name = "Google")
+            organizations.add(existingOrganization)
 
             val resultInc = communityDataManager.retrieveOrCreateEmployer("Google Inc")
             assertFalse(resultInc!!.created)
-            assertEquals(existingEmployer.uuid, resultInc.entity.uuid)
+            assertEquals(existingOrganization.uuid, resultInc.entity.uuid)
 
             val resultLlc = communityDataManager.retrieveOrCreateEmployer("Google LLC")
             assertFalse(resultLlc!!.created)
-            assertEquals(existingEmployer.uuid, resultLlc.entity.uuid)
+            assertEquals(existingOrganization.uuid, resultLlc.entity.uuid)
 
             val resultCorp = communityDataManager.retrieveOrCreateEmployer("Google Corporation")
             assertFalse(resultCorp!!.created)
-            assertEquals(existingEmployer.uuid, resultCorp.entity.uuid)
+            assertEquals(existingOrganization.uuid, resultCorp.entity.uuid)
         }
 
         @Test
         fun `should find existing employer via alias`() {
-            val existingEmployer = Employer(
+            val existingOrganization = Organization(
                 name = "Alphabet Inc",
                 aliases = setOf("google", "youtube")
             )
-            employers.add(existingEmployer)
+            organizations.add(existingOrganization)
 
             val result = communityDataManager.retrieveOrCreateEmployer("Google")
 
             assertNotNull(result)
             assertFalse(result!!.created)
-            assertEquals(existingEmployer.uuid, result.entity.uuid)
+            assertEquals(existingOrganization.uuid, result.entity.uuid)
         }
 
         @Test
         fun `should find existing employer via alias with suffix`() {
-            val existingEmployer = Employer(
+            val existingOrganization = Organization(
                 name = "Meta",
                 aliases = setOf("facebook")
             )
-            employers.add(existingEmployer)
+            organizations.add(existingOrganization)
 
             val result = communityDataManager.retrieveOrCreateEmployer("Facebook Inc.")
 
             assertNotNull(result)
             assertFalse(result!!.created)
-            assertEquals(existingEmployer.uuid, result.entity.uuid)
+            assertEquals(existingOrganization.uuid, result.entity.uuid)
         }
 
         @Test
@@ -185,8 +185,8 @@ class CommunityDataManagerTest {
 
         @Test
         fun `should not create duplicate employers`() {
-            val existingEmployer = Employer(name = "Red Hat")
-            employers.add(existingEmployer)
+            val existingOrganization = Organization(name = "Red Hat")
+            organizations.add(existingOrganization)
 
             // All these should find the existing employer
             val inputs = listOf(
@@ -201,7 +201,7 @@ class CommunityDataManagerTest {
             for (input in inputs) {
                 val result = communityDataManager.retrieveOrCreateEmployer(input)
                 assertFalse(result!!.created, "Expected existing for input: $input")
-                assertEquals(existingEmployer.uuid, result.entity.uuid, "UUID mismatch for input: $input")
+                assertEquals(existingOrganization.uuid, result.entity.uuid, "UUID mismatch for input: $input")
             }
         }
     }
@@ -278,8 +278,8 @@ class CommunityDataManagerTest {
 
         @Test
         fun `should create person with existing employer`() {
-            val existingEmployer = Employer(name = "Google")
-            employers.add(existingEmployer)
+            val existingOrganization = Organization(name = "Google")
+            organizations.add(existingOrganization)
 
             val ghUser = mockGHUser(company = "Google Inc")
 
@@ -287,16 +287,16 @@ class CommunityDataManagerTest {
 
             assertTrue(result.created)
             assertNotNull(result.entity.employer)
-            assertEquals(existingEmployer.uuid, result.entity.employer?.uuid)
+            assertEquals(existingOrganization.uuid, result.entity.employer?.uuid)
         }
 
         @Test
         fun `should create person with employer found via alias`() {
-            val existingEmployer = Employer(
+            val existingOrganization = Organization(
                 name = "Alphabet",
                 aliases = setOf("google")
             )
-            employers.add(existingEmployer)
+            organizations.add(existingOrganization)
 
             val ghUser = mockGHUser(company = "Google")
 
@@ -304,7 +304,7 @@ class CommunityDataManagerTest {
 
             assertTrue(result.created)
             assertNotNull(result.entity.employer)
-            assertEquals(existingEmployer.uuid, result.entity.employer?.uuid)
+            assertEquals(existingOrganization.uuid, result.entity.employer?.uuid)
         }
 
         @Test

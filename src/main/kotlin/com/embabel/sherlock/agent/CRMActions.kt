@@ -2,7 +2,7 @@ package com.embabel.sherlock.agent
 
 import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.EmbabelComponent
-import com.embabel.sherlock.domain.EmployerWithProfile
+import com.embabel.sherlock.domain.OrganizationWithProfile
 import com.embabel.sherlock.domain.PersonWithProfile
 import com.embabel.sherlock.service.CRMPublisher
 import org.slf4j.LoggerFactory
@@ -29,7 +29,7 @@ class CRMActions(
     }
 
     @Action
-    fun createEmployerCRMRecord(employerWithProfile: EmployerWithProfile): EmployerWithProfile {
+    fun createEmployerCRMRecord(employerWithProfile: OrganizationWithProfile): OrganizationWithProfile {
         logger.info(
             "Creating CRM record for employer name='{}'",
             employerWithProfile.name,

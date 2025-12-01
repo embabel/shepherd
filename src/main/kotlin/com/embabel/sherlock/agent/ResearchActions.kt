@@ -5,13 +5,13 @@ import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.Ai
 import com.embabel.agent.core.CoreToolGroups
 import com.embabel.shepherd.conf.ShepherdProperties
-import com.embabel.shepherd.domain.Employer
+import com.embabel.shepherd.domain.Organization
 import com.embabel.shepherd.domain.Person
 import com.embabel.shepherd.service.CommunityDataManager
 import com.embabel.shepherd.service.NewEntity
 import com.embabel.sherlock.conf.SherlockProperties
 import com.embabel.sherlock.domain.CompanyProfile
-import com.embabel.sherlock.domain.EmployerWithProfile
+import com.embabel.sherlock.domain.OrganizationWithProfile
 import com.embabel.sherlock.domain.PersonWithProfile
 import com.embabel.sherlock.domain.Profile
 import org.slf4j.LoggerFactory
@@ -75,11 +75,11 @@ class ResearchActions(
     fun researchCompany(
         newEntity: NewEntity<*>,
         ai: Ai,
-    ): EmployerWithProfile {
-        val employer = newEntity.newEntities.filterIsInstance<Employer>().first()
+    ): OrganizationWithProfile {
+        val organization = newEntity.newEntities.filterIsInstance<Organization>().first()
         logger.info(
             "Researching employer {}",
-            employer,
+            organization,
         )
 
         val profile = ai
@@ -91,17 +91,17 @@ class ResearchActions(
             .fromTemplate(
                 "research_company",
                 mapOf(
-                    "company" to employer,
+                    "company" to organization,
                     "properties" to properties,
                 ),
             )
         logger.info(
             "Researched company name='{}', profile=\n{}",
-            employer.name,
+            organization.name,
             profile,
         )
 
-        return communityDataManager.save(EmployerWithProfile.from(employer, profile))
+        return communityDataManager.save(OrganizationWithProfile.from(organization, profile))
     }
 
 }

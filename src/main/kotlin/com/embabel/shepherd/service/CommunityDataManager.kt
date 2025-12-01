@@ -12,7 +12,7 @@ import java.util.*
 @Service
 class CommunityDataManager(
     val mixinTemplate: MixinTemplate,
-    private val employerCanonicalizer: EmployerCanonicalizer = RegexEmployerCanonicalizer(),
+    private val organizationCanonicalizer: OrganizationCanonicalizer = RegexOrganizationCanonicalizer(),
 ) {
 
     @Transactional(readOnly = true)
@@ -45,7 +45,7 @@ class CommunityDataManager(
      * Uses the configured EmployerCanonicalizer for matching.
      */
     @Transactional
-    fun retrieveOrCreateEmployer(companyName: String?): EntityStatus<Employer>? {
+    fun retrieveOrCreateEmployer(companyName: String?): EntityStatus<Organization>? {
         if (companyName.isNullOrBlank()) {
             return null
         }
@@ -53,19 +53,19 @@ class CommunityDataManager(
         return EntityStatus.retrieveOrCreate(
             {
                 // Find employer using the canonicalizer's matching logic
-                mixinTemplate.findAll(Employer::class.java)
-                    .find { employerCanonicalizer.matches(companyName, it) }
+                mixinTemplate.findAll(Organization::class.java)
+                    .find { organizationCanonicalizer.matches(companyName, it) }
             }
         ) {
             // Create new employer with the original company name as canonical
             // Add normalized variant as alias if different from the original
-            val canonical = employerCanonicalizer.canonicalize(companyName)
+            val canonical = organizationCanonicalizer.canonicalize(companyName)
             val aliases = if (canonical != companyName.lowercase()) {
                 setOf(canonical)
             } else {
                 emptySet()
             }
-            NewEntity(Employer(name = companyName, aliases = aliases), emptyList())
+            NewEntity(Organization(name = companyName, aliases = aliases), emptyList())
         }
     }
 

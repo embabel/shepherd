@@ -7,7 +7,7 @@ interface Person : HasUUID {
     val name: String
     val bio: String?
     val githubLogin: String?
-    val employer: Employer?
+    val employer: Organization?
 
     companion object {
 
@@ -16,7 +16,7 @@ interface Person : HasUUID {
             name: String,
             bio: String? = null,
             githubLogin: String? = null,
-            employer: Employer? = null,
+            employer: Organization? = null,
         ): Person = PersonImpl(
             uuid = uuid,
             name = name,
@@ -32,6 +32,6 @@ internal data class PersonImpl(
     override val name: String,
     override val bio: String?,
     override val githubLogin: String?,
-    override val employer: Employer?,
+    override val employer: Organization?,
 ) : Person
 

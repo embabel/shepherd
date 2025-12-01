@@ -1,7 +1,7 @@
 package com.embabel.sherlock.domain
 
-import com.embabel.shepherd.domain.Employer
 import com.embabel.shepherd.domain.HasUUID
+import com.embabel.shepherd.domain.Organization
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import java.time.Instant
 import java.util.*
@@ -23,15 +23,15 @@ data class CompanyProfile(
  * This is a mixin interface that adds profile to Employer using delegation.
  * The more specific type knows about the less specific, not the reverse.
  */
-interface EmployerWithProfile : Employer {
+interface OrganizationWithProfile : Organization {
     val profile: CompanyProfile
 
     companion object {
         /**
          * Create an EmployerWithProfile from an Employer and CompanyProfile.
          */
-        fun from(employer: Employer, profile: CompanyProfile): EmployerWithProfile {
-            return object : EmployerWithProfile, Employer by employer {
+        fun from(organization: Organization, profile: CompanyProfile): OrganizationWithProfile {
+            return object : OrganizationWithProfile, Organization by organization {
                 override val profile: CompanyProfile = profile
             }
         }

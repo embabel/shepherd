@@ -1,6 +1,6 @@
 package com.embabel.sherlock.service
 
-import com.embabel.sherlock.domain.EmployerWithProfile
+import com.embabel.sherlock.domain.OrganizationWithProfile
 import com.embabel.sherlock.domain.PersonWithProfile
 
 /**
@@ -18,5 +18,5 @@ interface CRMPublisher {
      * Publish an employer with their profile to the CRM.
      * @param employerWithProfile the employer and profile to publish
      */
-    fun publishEmployer(employerWithProfile: EmployerWithProfile)
+    fun publishEmployer(employerWithProfile: OrganizationWithProfile)
 }

@@ -3,11 +3,7 @@ package com.embabel.shepherd
 import com.embabel.agent.api.invocation.UtilityInvocation
 import com.embabel.agent.core.AgentPlatform
 import com.embabel.shepherd.conf.ShepherdProperties
-import com.embabel.shepherd.domain.Employer
-import com.embabel.shepherd.domain.Person
-import com.embabel.shepherd.domain.PullRequest
-import com.embabel.shepherd.domain.RaisableIssue
-import com.embabel.shepherd.domain.Repository
+import com.embabel.shepherd.domain.*
 import com.embabel.shepherd.service.IssueReader
 import com.embabel.shepherd.service.RepoId
 import com.embabel.sherlock.domain.PersonWithProfile
@@ -94,7 +90,7 @@ class ShepherdShell(
 
     @ShellMethod
     fun employers() {
-        val employers = mixinTemplate.findAll<Employer>()
+        val employers = mixinTemplate.findAll<Organization>()
         for (employer in employers) {
             println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(employer))
         }

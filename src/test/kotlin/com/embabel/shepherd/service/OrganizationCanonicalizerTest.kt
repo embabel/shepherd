@@ -1,6 +1,6 @@
 package com.embabel.shepherd.service
 
-import com.embabel.shepherd.domain.Employer
+import com.embabel.shepherd.domain.Organization
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -8,9 +8,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 
-class EmployerCanonicalizerTest {
+class OrganizationCanonicalizerTest {
 
-    private val canonicalizer = RegexEmployerCanonicalizer()
+    private val canonicalizer = RegexOrganizationCanonicalizer()
 
     @Nested
     inner class CanonicalizeTests {
@@ -78,66 +78,66 @@ class EmployerCanonicalizerTest {
 
         @Test
         fun `should match exact canonical name case-insensitively`() {
-            val employer = Employer(name = "Google")
+            val organization = Organization(name = "Google")
 
-            assertTrue(canonicalizer.matches("Google", employer))
-            assertTrue(canonicalizer.matches("google", employer))
-            assertTrue(canonicalizer.matches("GOOGLE", employer))
-            assertTrue(canonicalizer.matches("gOoGlE", employer))
+            assertTrue(canonicalizer.matches("Google", organization))
+            assertTrue(canonicalizer.matches("google", organization))
+            assertTrue(canonicalizer.matches("GOOGLE", organization))
+            assertTrue(canonicalizer.matches("gOoGlE", organization))
         }
 
         @Test
         fun `should match with common suffixes`() {
-            val employer = Employer(name = "Google")
+            val organization = Organization(name = "Google")
 
-            assertTrue(canonicalizer.matches("Google Inc", employer))
-            assertTrue(canonicalizer.matches("Google Inc.", employer))
-            assertTrue(canonicalizer.matches("Google LLC", employer))
-            assertTrue(canonicalizer.matches("Google Corporation", employer))
-            assertTrue(canonicalizer.matches("Google Company", employer))
+            assertTrue(canonicalizer.matches("Google Inc", organization))
+            assertTrue(canonicalizer.matches("Google Inc.", organization))
+            assertTrue(canonicalizer.matches("Google LLC", organization))
+            assertTrue(canonicalizer.matches("Google Corporation", organization))
+            assertTrue(canonicalizer.matches("Google Company", organization))
         }
 
         @Test
         fun `should match against aliases`() {
-            val employer = Employer(
+            val organization = Organization(
                 name = "Alphabet Inc",
                 aliases = setOf("google", "youtube", "deepmind")
             )
 
-            assertTrue(canonicalizer.matches("Google", employer))
-            assertTrue(canonicalizer.matches("YouTube", employer))
-            assertTrue(canonicalizer.matches("DeepMind", employer))
-            assertTrue(canonicalizer.matches("Alphabet Inc", employer))
-            assertTrue(canonicalizer.matches("Alphabet", employer))
+            assertTrue(canonicalizer.matches("Google", organization))
+            assertTrue(canonicalizer.matches("YouTube", organization))
+            assertTrue(canonicalizer.matches("DeepMind", organization))
+            assertTrue(canonicalizer.matches("Alphabet Inc", organization))
+            assertTrue(canonicalizer.matches("Alphabet", organization))
         }
 
         @Test
         fun `should match aliases with suffixes`() {
-            val employer = Employer(
+            val organization = Organization(
                 name = "Meta",
                 aliases = setOf("facebook")
             )
 
-            assertTrue(canonicalizer.matches("Facebook Inc", employer))
-            assertTrue(canonicalizer.matches("Facebook LLC", employer))
-            assertTrue(canonicalizer.matches("Meta Corporation", employer))
+            assertTrue(canonicalizer.matches("Facebook Inc", organization))
+            assertTrue(canonicalizer.matches("Facebook LLC", organization))
+            assertTrue(canonicalizer.matches("Meta Corporation", organization))
         }
 
         @Test
         fun `should not match unrelated companies`() {
-            val employer = Employer(name = "Google")
+            val organization = Organization(name = "Google")
 
-            assertFalse(canonicalizer.matches("Microsoft", employer))
-            assertFalse(canonicalizer.matches("Apple", employer))
-            assertFalse(canonicalizer.matches("Googles", employer)) // typo
+            assertFalse(canonicalizer.matches("Microsoft", organization))
+            assertFalse(canonicalizer.matches("Apple", organization))
+            assertFalse(canonicalizer.matches("Googles", organization)) // typo
         }
 
         @Test
         fun `should handle empty aliases`() {
-            val employer = Employer(name = "Startup", aliases = emptySet())
+            val organization = Organization(name = "Startup", aliases = emptySet())
 
-            assertTrue(canonicalizer.matches("Startup", employer))
-            assertFalse(canonicalizer.matches("OtherCompany", employer))
+            assertTrue(canonicalizer.matches("Startup", organization))
+            assertFalse(canonicalizer.matches("OtherCompany", organization))
         }
 
         @ParameterizedTest
@@ -152,8 +152,8 @@ class EmployerCanonicalizerTest {
             ]
         )
         fun `should match multi-word company names`(input: String) {
-            val employer = Employer(name = "Red Hat")
-            assertTrue(canonicalizer.matches(input, employer))
+            val organization = Organization(name = "Red Hat")
+            assertTrue(canonicalizer.matches(input, organization))
         }
     }
 
@@ -163,18 +163,18 @@ class EmployerCanonicalizerTest {
         @Test
         fun `should allow custom canonicalizer implementation`() {
             // Custom canonicalizer that only lowercases
-            val simpleCanonicalizer = object : EmployerCanonicalizer {
-                override fun canonicalize(companyName: String): String {
-                    return companyName.lowercase().trim()
+            val simpleCanonicalizer = object : OrganizationCanonicalizer {
+                override fun canonicalize(organizationName: String): String {
+                    return organizationName.lowercase().trim()
                 }
             }
 
             // This won't strip "Inc" like the default
             assertEquals("google inc", simpleCanonicalizer.canonicalize("Google Inc"))
 
-            val employer = Employer(name = "Google Inc")
-            assertTrue(simpleCanonicalizer.matches("google inc", employer))
-            assertFalse(simpleCanonicalizer.matches("Google", employer)) // Won't match without suffix
+            val organization = Organization(name = "Google Inc")
+            assertTrue(simpleCanonicalizer.matches("google inc", organization))
+            assertFalse(simpleCanonicalizer.matches("Google", organization)) // Won't match without suffix
         }
     }
 }

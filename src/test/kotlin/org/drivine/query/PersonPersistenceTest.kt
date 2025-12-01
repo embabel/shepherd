@@ -68,7 +68,7 @@ class PersonPersistenceTest {
 
     @Test
     fun `should persist and retrieve Person with Employer`() {
-        val org = Employer(
+        val org = Organization(
             uuid = UUID.randomUUID(),
             name = "Acme Corp"
         )
@@ -103,7 +103,7 @@ class PersonPersistenceTest {
 
     @Test
     fun `should persist Employer separately`() {
-        val org = Employer(
+        val org = Organization(
             uuid = UUID.randomUUID(),
             name = "Acme Corp"
         )
@@ -117,7 +117,7 @@ class PersonPersistenceTest {
 
     @Test
     fun `two persons with same Employer should result in one Employer file when saved separately`() {
-        val sharedOrg = Employer(
+        val sharedOrg = Organization(
             uuid = UUID.randomUUID(),
             name = "Shared Corp"
         )
@@ -157,7 +157,7 @@ class PersonPersistenceTest {
 
     @Test
     fun `saving same Employer twice should not create duplicate files`() {
-        val org = Employer(
+        val org = Organization(
             uuid = UUID.randomUUID(),
             name = "Unique Corp"
         )
@@ -234,7 +234,7 @@ class PersonPersistenceTest {
             githubLogin = "user111",
             employer = null
         )
-        val org = Employer(
+        val org = Organization(
             uuid = UUID.randomUUID(),
             name = "Acme"
         )
