@@ -25,15 +25,6 @@ class CommunityDataManager(
     }
 
     /**
-     * The issue and any new subgraph elements we saved
-     * when we stored it
-     */
-    data class IssueStorageResult(
-        val issue: RaisableIssue,
-        val newPerson: Person?,
-    )
-
-    /**
      * Retrieve an existing repository by owner and name, or create a new one.
      */
     @Transactional
@@ -45,7 +36,7 @@ class CommunityDataManager(
                     .find { it.owner == owner && it.name == name }
             }
         ) {
-            Repository(owner = owner, name = name)
+            NewEntity(Repository(owner = owner, name = name), emptyList())
         }
     }
 
@@ -74,7 +65,7 @@ class CommunityDataManager(
             } else {
                 emptySet()
             }
-            Employer(name = companyName, aliases = aliases)
+            NewEntity(Employer(name = companyName, aliases = aliases), emptyList())
         }
     }
 
@@ -91,12 +82,14 @@ class CommunityDataManager(
             mixinTemplate.findAll(Person::class.java)
                 .find { it.githubId == ghUser.id }
         }) {
-            Person(
-                uuid = UUID.randomUUID(),
-                name = ghUser.name ?: ghUser.login,
-                bio = ghUser.bio ?: "",
-                githubId = ghUser.id,
-                employer = employer?.entity,
+            NewEntity(
+                Person(
+                    uuid = UUID.randomUUID(),
+                    name = ghUser.name ?: ghUser.login,
+                    bio = ghUser.bio ?: "",
+                    githubId = ghUser.id,
+                    employer = employer?.entity,
+                ), listOfNotNull(employer)
             )
         }
     }
@@ -105,7 +98,7 @@ class CommunityDataManager(
      * Save the issue and its person and company if not already present
      */
     @Transactional
-    fun saveAndExpandIssue(ghIssue: GHIssue): IssueStorageResult {
+    fun saveAndExpandIssue(ghIssue: GHIssue): EntityStatus<Issue> {
         val ghRepository = ghIssue.repository
         val repositoryStatus = retrieveOrCreateRepository(
             owner = ghRepository.ownerName,
@@ -127,9 +120,9 @@ class CommunityDataManager(
         val raisableIssue = RaisableIssue.from(saved, personStatus.entity)
         mixinTemplate.save(raisableIssue)
 
-        return IssueStorageResult(
-            issue = raisableIssue,
-            newPerson = if (personStatus.created) personStatus.entity else null,
+        return NewEntity(
+            entity = raisableIssue,
+            otherNewEntities = personStatus.newEntities,
         )
     }
 

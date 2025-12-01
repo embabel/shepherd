@@ -6,9 +6,10 @@ import com.embabel.agent.api.common.Ai
 import com.embabel.agent.api.common.OperationContext
 import com.embabel.common.core.types.ZeroToOne
 import com.embabel.shepherd.conf.ShepherdProperties
+import com.embabel.shepherd.service.CommunityDataManager
 import com.embabel.shepherd.service.DummyGitHubUpdater
 import com.embabel.shepherd.service.GitHubUpdater
-import com.embabel.shepherd.service.CommunityDataManager
+import com.embabel.shepherd.service.NewEntity
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
@@ -65,11 +66,13 @@ class IssueActions(
     }
 
     @Action(
-        pre = ["spel:!(ghIssue instanceof T(org.kohsuke.github.GHPullRequest))"]
+        pre = [
+            "spel:newEntity.newEntities.?[#this instanceof T(com.embabel.shepherd.domain.Issue) && !(#this instanceof T(com.embabel.shepherd.domain.PullRequest))].size() > 0"
+        ]
     )
     fun reactToNewIssue(
         ghIssue: GHIssue,
-        issueStorageResult: CommunityDataManager.IssueStorageResult,
+        newEntity: NewEntity<*>,
         ai: Ai
     ): IssueAssessment {
         logger.info(
@@ -104,17 +107,14 @@ class IssueActions(
         return firstResponse
     }
 
-    @Action
-    fun publishNewPerson(issueStorageResult: CommunityDataManager.IssueStorageResult): NewPerson? {
-        return issueStorageResult.newPerson?.let { NewPerson(it) }
-    }
-
     @Action(
-        pre = ["spel:ghIssue instanceof T(org.kohsuke.github.GHPullRequest)"]
+        pre = [
+            "spel:newEntity.newEntities.?[#this instanceof T(com.embabel.shepherd.domain.PullRequest)].size() > 0"
+        ]
     )
     fun reactToNewPullRequest(
         ghIssue: GHPullRequest,
-        issueStorageResult: CommunityDataManager.IssueStorageResult,
+        newEntity: NewEntity<*>,
         ai: Ai,
     ): PullRequestAssessment {
         logger.info(
