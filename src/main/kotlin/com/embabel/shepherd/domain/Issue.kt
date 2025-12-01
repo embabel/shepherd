@@ -10,6 +10,7 @@ interface Issue : HasUUID {
      * The unique identifier of the issue from github
      */
     val id: Long
+    val repository: Repository
     val state: String?
     val stateReason: GHIssueStateReason?
     val number: Int
@@ -39,10 +40,11 @@ interface Issue : HasUUID {
 
     companion object {
 
-        fun fromGHIssue(ghIssue: GHIssue): Issue {
+        fun fromGHIssue(ghIssue: GHIssue, repository: Repository): Issue {
             val issue = IssueImpl(
                 uuid = UUID.randomUUID(),
                 id = ghIssue.id,
+                repository = repository,
                 state = ghIssue.state?.name,
                 stateReason = ghIssue.stateReason,
                 number = ghIssue.number,
@@ -63,6 +65,7 @@ interface Issue : HasUUID {
         fun create(
             uuid: UUID = UUID.randomUUID(),
             id: Long,
+            repository: Repository,
             state: String? = null,
             stateReason: GHIssueStateReason? = null,
             number: Int,
@@ -75,6 +78,7 @@ interface Issue : HasUUID {
         ): Issue = IssueImpl(
             uuid = uuid,
             id = id,
+            repository = repository,
             state = state,
             stateReason = stateReason,
             number = number,
@@ -91,6 +95,7 @@ interface Issue : HasUUID {
 internal data class IssueImpl(
     override val uuid: UUID,
     override val id: Long,
+    override val repository: Repository,
     override val state: String?,
     override val stateReason: GHIssueStateReason?,
     override val number: Int,

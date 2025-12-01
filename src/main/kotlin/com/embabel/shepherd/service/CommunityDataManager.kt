@@ -34,6 +34,22 @@ class CommunityDataManager(
     )
 
     /**
+     * Retrieve an existing repository by owner and name, or create a new one.
+     */
+    @Transactional
+    fun retrieveOrCreateRepository(owner: String, name: String): EntityStatus<Repository> {
+        return EntityStatus.retrieveOrCreate(
+            {
+                // TODO make efficient
+                mixinTemplate.findAll(Repository::class.java)
+                    .find { it.owner == owner && it.name == name }
+            }
+        ) {
+            Repository(owner = owner, name = name)
+        }
+    }
+
+    /**
      * Retrieve an existing employer by company name, or create a new one.
      * Uses the configured EmployerCanonicalizer for matching.
      */
@@ -90,10 +106,20 @@ class CommunityDataManager(
      */
     @Transactional
     fun saveAndExpandIssue(ghIssue: GHIssue): IssueStorageResult {
+        val ghRepository = ghIssue.repository
+        val repositoryStatus = retrieveOrCreateRepository(
+            owner = ghRepository.ownerName,
+            name = ghRepository.name
+        )
+        val repository = repositoryStatus.entity
+        if (repositoryStatus.created) {
+            mixinTemplate.save(repository)
+        }
+
         val issue = if (ghIssue is GHPullRequest) {
-            PullRequest.fromGHPullRequest(ghIssue)
+            PullRequest.fromGHPullRequest(ghIssue, repository)
         } else {
-            Issue.fromGHIssue(ghIssue)
+            Issue.fromGHIssue(ghIssue, repository)
         }
         val saved = mixinTemplate.save(issue)
 
@@ -107,6 +133,10 @@ class CommunityDataManager(
         )
     }
 
+//    @Transactional
+//    fun makeStar(person: Person, )
+
+    @Transactional
     fun <T> save(entity: T): T {
         return mixinTemplate.save(entity)
     }

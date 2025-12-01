@@ -35,10 +35,11 @@ interface PullRequest : Issue {
     }
 
     companion object {
-        fun fromGHPullRequest(ghPr: GHPullRequest): PullRequest {
+        fun fromGHPullRequest(ghPr: GHPullRequest, repository: Repository): PullRequest {
             return PullRequestImpl(
                 uuid = UUID.randomUUID(),
                 id = ghPr.id,
+                repository = repository,
                 state = ghPr.state?.name,
                 stateReason = ghPr.stateReason,
                 number = ghPr.number,
@@ -73,6 +74,7 @@ interface PullRequest : Issue {
         operator fun invoke(
             uuid: UUID = UUID.randomUUID(),
             id: Long,
+            repository: Repository,
             state: String? = null,
             stateReason: GHIssueStateReason? = null,
             number: Int,
@@ -101,6 +103,7 @@ interface PullRequest : Issue {
         ): PullRequest = PullRequestImpl(
             uuid = uuid,
             id = id,
+            repository = repository,
             state = state,
             stateReason = stateReason,
             number = number,
@@ -133,6 +136,7 @@ interface PullRequest : Issue {
 internal data class PullRequestImpl(
     override val uuid: UUID,
     override val id: Long,
+    override val repository: Repository,
     override val state: String?,
     override val stateReason: GHIssueStateReason?,
     override val number: Int,

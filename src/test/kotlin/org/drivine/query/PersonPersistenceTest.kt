@@ -19,6 +19,9 @@ class PersonPersistenceTest {
 
     private lateinit var template: FileMixinTemplate
 
+    // Shared test repository for all tests
+    private val testRepository = Repository(owner = "test", name = "repo")
+
     @BeforeEach
     fun setUp() {
         // Use composite extractor: try HasUUID first, then fall back to @Id annotation
@@ -195,6 +198,7 @@ class PersonPersistenceTest {
         val issue = Issue.create(
             uuid = issueUuid,
             id = 12345L,
+            repository = testRepository,
             state = "open",
             number = 42,
             body = "This is a bug",
@@ -238,6 +242,7 @@ class PersonPersistenceTest {
         val issue = Issue.create(
             uuid = issueUuid,
             id = 999L,
+            repository = testRepository,
             state = "closed",
             number = 1,
             closedAt = "2024-01-01",
@@ -275,6 +280,7 @@ class PersonPersistenceTest {
         val issue = Issue.create(
             uuid = issueUuid,
             id = 54321L,
+            repository = testRepository,
             state = "open",
             number = 100,
             body = "Found a bug",
@@ -404,6 +410,7 @@ class PersonPersistenceTest {
         val issue = Issue.create(
             uuid = UUID.randomUUID(),
             id = 99999L,
+            repository = testRepository,
             state = "open",
             number = 1,
             body = "Found a bug",
@@ -529,6 +536,7 @@ class PersonPersistenceTest {
         val pr = PullRequest(
             uuid = prUuid,
             id = 99999L,
+            repository = testRepository,
             state = "open",
             stateReason = null,
             number = 42,
@@ -596,6 +604,7 @@ class PersonPersistenceTest {
         val pr = PullRequest(
             uuid = prUuid,
             id = 88888L,
+            repository = testRepository,
             state = "closed",
             number = 100,
             body = "Bug fix PR",
@@ -636,6 +645,7 @@ class PersonPersistenceTest {
         val pr = PullRequest(
             uuid = prUuid,
             id = 77777L,
+            repository = testRepository,
             state = "closed",
             stateReason = GHIssueStateReason.COMPLETED,
             number = 200,
@@ -678,6 +688,7 @@ class PersonPersistenceTest {
         val pr = PullRequest(
             uuid = prUuid,
             id = 66666L,
+            repository = testRepository,
             state = "open",
             number = 300,
             body = "WIP: Working on this",
@@ -711,6 +722,7 @@ class PersonPersistenceTest {
         val issue = Issue.create(
             uuid = UUID.randomUUID(),
             id = 11111L,
+            repository = testRepository,
             state = "open",
             number = 1,
             body = "Regular issue",
@@ -721,6 +733,7 @@ class PersonPersistenceTest {
         val pr = PullRequest(
             uuid = UUID.randomUUID(),
             id = 22222L,
+            repository = testRepository,
             state = "open",
             number = 2,
             body = "PR body",

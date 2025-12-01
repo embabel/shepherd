@@ -1,5 +1,6 @@
 package com.embabel.shepherd.agent
 
+import com.embabel.shepherd.domain.Employer
 import com.embabel.shepherd.domain.Person
 
 /**
@@ -8,4 +9,8 @@ import com.embabel.shepherd.domain.Person
  */
 data class NewPerson(
     val person: Person,
+)
+
+data class NewEmployer(
+    val employer: Employer,
 )
