@@ -1,5 +1,6 @@
 package com.embabel.shepherd.service
 
+import com.embabel.shepherd.domain.GitHubProfile
 import com.embabel.shepherd.domain.Organization
 import com.embabel.shepherd.domain.Person
 import io.mockk.every
@@ -214,12 +215,22 @@ class CommunityDataManagerTest {
             login: String = "testuser",
             name: String? = "Test User",
             bio: String? = "A test bio",
+            blog: String? = null,
+            location: String? = null,
+            type: String = "User",
+            publicRepoCount: Int = 10,
+            avatarUrl: String? = "https://avatars.githubusercontent.com/u/12345",
             company: String? = null
         ): GHUser = mockk {
             every { getId() } returns id
             every { getLogin() } returns login
             every { getName() } returns name
             every { getBio() } returns bio
+            every { getBlog() } returns blog
+            every { getLocation() } returns location
+            every { getType() } returns type
+            every { getPublicRepoCount() } returns publicRepoCount
+            every { getAvatarUrl() } returns avatarUrl
             every { getCompany() } returns company
         }
 
@@ -231,8 +242,10 @@ class CommunityDataManagerTest {
 
             assertTrue(result.created)
             assertEquals("Test User", result.entity.name)
-            assertEquals("A test bio", result.entity.bio)
-            assertEquals("testuser", result.entity.githubLogin)
+            assertNotNull(result.entity.github)
+            assertEquals("testuser", result.entity.github?.login)
+            assertEquals("A test bio", result.entity.github?.bio)
+            assertEquals("User", result.entity.github?.type)
             assertNull(result.entity.employer)
         }
 
@@ -247,12 +260,20 @@ class CommunityDataManagerTest {
         }
 
         @Test
-        fun `should find existing person by GitHub ID`() {
+        fun `should find existing person by GitHub login`() {
             val existingPerson = Person(
                 uuid = UUID.randomUUID(),
                 name = "Existing User",
-                bio = "Old bio",
-                githubLogin = "testuser"
+                github = GitHubProfile(
+                    login = "testuser",
+                    name = "Existing User",
+                    bio = "Old bio",
+                    blog = null,
+                    location = null,
+                    type = "User",
+                    publicRepoCount = 5,
+                    avatarUrl = null,
+                ),
             )
             persons.add(existingPerson)
 
@@ -328,12 +349,13 @@ class CommunityDataManagerTest {
         }
 
         @Test
-        fun `should handle empty bio`() {
+        fun `should handle null bio`() {
             val ghUser = mockGHUser(bio = null)
 
             val result = communityDataManager.retrieveOrCreatePersonFrom(ghUser)
 
-            assertEquals("", result.entity.bio)
+            assertNotNull(result.entity.github)
+            assertNull(result.entity.github?.bio)
         }
     }
 }

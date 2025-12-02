@@ -20,6 +20,16 @@
 
 Help manage GitHub developer communities using Embabel.
 
+Goals:
+
+- To help manage Embabel and other open source communities on GitHub deal with activity across multiple repositories.
+
+Privacy:
+
+- We work only with public data.
+- We do _not_ store or use any email address, even if it's part of a user's GitHub public
+  profile.
+
 Illustrates use of Utility AI.
 
 ## Setup
