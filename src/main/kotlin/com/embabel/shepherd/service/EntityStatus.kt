@@ -8,6 +8,10 @@ package com.embabel.shepherd.service
  */
 sealed interface EntityStatus<T : Any> {
     val entity: T
+
+    /**
+     * True if the entity was newly created, false if it already existed.
+     */
     val created: Boolean
 
     /**

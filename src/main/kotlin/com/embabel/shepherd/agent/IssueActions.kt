@@ -15,26 +15,33 @@ import org.kohsuke.github.GHIssue
 import org.kohsuke.github.GHPullRequest
 import org.slf4j.LoggerFactory
 
+interface Assessment {
+    val comment: String
+
+    @get:JsonPropertyDescription("A value between 0 and 1 indicating the urgency of addressing this issue, where 1 is most urgent")
+    val urgency: ZeroToOne
+
+    @get:JsonPropertyDescription("A value between 0 and 1 indicating the sentiment of the person who opened the issue, where 0 is negative and 1 is positive")
+    val sentiment: ZeroToOne
+
+    @get:JsonPropertyDescription("Labels to apply to the issue")
+    val labels: Set<String>
+}
+
 data class IssueAssessment(
-    val comment: String,
-    @field:JsonPropertyDescription("A value between 0 and 1 indicating the urgency of addressing this issue, where 1 is most urgent")
-    val urgency: ZeroToOne,
-    @field:JsonPropertyDescription("A value between 0 and 1 indicating the sentiment of the person who opened the issue, where 0 is negative and 1 is positive")
-    val sentiment: ZeroToOne,
-    @field:JsonPropertyDescription("Labels to apply to the issue")
-    val labels: Set<String>,
-)
+    override val comment: String,
+    override val urgency: ZeroToOne,
+    override val sentiment: ZeroToOne,
+    override val labels: Set<String>,
+) : Assessment
 
 data class PullRequestAssessment(
-    val comment: String,
-    @field:JsonPropertyDescription("A value between 0 and 1 indicating the urgency of addressing this issue, where 1 is most urgent")
-    val urgency: ZeroToOne,
-    @field:JsonPropertyDescription("A value between 0 and 1 indicating the sentiment of the person who opened the issue, where 0 is negative and 1 is positive")
-    val sentiment: ZeroToOne,
-    @field:JsonPropertyDescription("Labels to apply to the issue")
-    val labels: Set<String>,
+    override val comment: String,
+    override val urgency: ZeroToOne,
+    override val sentiment: ZeroToOne,
+    override val labels: Set<String>,
     val filesChanged: Int = -1,
-)
+) : Assessment
 
 
 @EmbabelComponent
@@ -56,8 +63,9 @@ class IssueActions(
     fun saveNewIssue(ghIssue: GHIssue, context: OperationContext): GHIssue? {
         val existing = communityDataManager.findIssueByGithubId(ghIssue.id)
         if (existing == null) {
-            val issueStorageResult = communityDataManager.saveAndExpandIssue(ghIssue)
-            context += issueStorageResult
+            val issueEntityStatus = communityDataManager.saveAndExpandIssue(ghIssue)
+            // Make the information about this entity available to later actions
+            context += issueEntityStatus
             logger.info("New issue found: #{}, title='{}'", ghIssue.number, ghIssue.title)
             return ghIssue
         }
@@ -103,7 +111,6 @@ class IssueActions(
             ghIssue,
             issueAssessment.labels
         )
-
         return issueAssessment
     }
 
@@ -146,9 +153,9 @@ class IssueActions(
 
     // TODO note that naming comes from blackboard, not parameter name
     @Action(
-        pre = ["spel:firstResponse.urgency > 0.0"]
+        pre = ["spel:issueAssessment.urgency > 0.0"]
     )
-    fun heavyHitter(issue: GHIssue, issueAssessment: IssueAssessment) {
+    fun heavyHitterIssue(issue: GHIssue, issueAssessment: IssueAssessment) {
         logger.info("Taking heavy hitter action on issue #{}", issue.number)
     }
 

@@ -6,6 +6,7 @@ import com.embabel.shepherd.conf.ShepherdProperties
 import com.embabel.shepherd.domain.Person
 import com.embabel.shepherd.service.CommunityDataManager
 import com.embabel.shepherd.service.EntityStatus
+import com.embabel.shepherd.service.RepoId
 import org.kohsuke.github.GHStargazer
 import org.slf4j.LoggerFactory
 
@@ -26,19 +27,22 @@ class StarActions(
         val starredAt = stargazer.starredAt
 
         logger.info(
-            "User '{}' starred repository '{}' at {}",
+            "User {} starred repository {} at {}",
             user.login,
             stargazer.repository.fullName,
             starredAt
         )
 
         val personStatus = communityDataManager.retrieveOrCreatePersonFrom(user)
-//        if (personStatus.created) {
-//            logger.info("Created new person for stargazer: login='{}', name='{}'", user.login, user.name)
-//            communityDataManager.save(personStatus.entity)
-//            return personStatus
-//        }
-//        return null
+        if (personStatus.created) {
+            logger.info("Created new person for stargazer: login='{}', name='{}'", user.login, user.name)
+            communityDataManager.save(personStatus.entity)
+        }
+        communityDataManager.recordStar(
+            personStatus.entity,
+            RepoId(stargazer.repository.owner.name, stargazer.repository.name),
+            starredAt,
+        )
         return personStatus
     }
 }

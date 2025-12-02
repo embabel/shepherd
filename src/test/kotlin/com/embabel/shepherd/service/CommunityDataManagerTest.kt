@@ -219,7 +219,10 @@ class CommunityDataManagerTest {
             location: String? = null,
             type: String = "User",
             publicRepoCount: Int = 10,
+            followersCount: Int = 100,
             avatarUrl: String? = "https://avatars.githubusercontent.com/u/12345",
+            htmlUrl: String = "https://github.com/testuser",
+            twitterUsername: String? = null,
             company: String? = null
         ): GHUser = mockk {
             every { getId() } returns id
@@ -230,7 +233,10 @@ class CommunityDataManagerTest {
             every { getLocation() } returns location
             every { getType() } returns type
             every { getPublicRepoCount() } returns publicRepoCount
+            every { getFollowersCount() } returns followersCount
             every { getAvatarUrl() } returns avatarUrl
+            every { getHtmlUrl() } returns java.net.URL(htmlUrl)
+            every { getTwitterUsername() } returns twitterUsername
             every { getCompany() } returns company
         }
 
@@ -272,7 +278,9 @@ class CommunityDataManagerTest {
                     location = null,
                     type = "User",
                     publicRepoCount = 5,
+                    followers = 50,
                     avatarUrl = null,
+                    htmlUrl = "https://github.com/testuser",
                 ),
             )
             persons.add(existingPerson)

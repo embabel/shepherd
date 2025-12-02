@@ -7,7 +7,7 @@ import org.kohsuke.github.GHPullRequest
 import org.kohsuke.github.GHUser
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.time.Instant
 
 @Service
 class CommunityDataManager(
@@ -90,7 +90,7 @@ class CommunityDataManager(
     }
 
     /**
-     * Save the issue and its person and company if not already present
+     * Save the issue and the raiser and company if not already present
      */
     @Transactional
     fun saveAndExpandIssue(ghIssue: GHIssue): EntityStatus<Issue> {
@@ -119,8 +119,14 @@ class CommunityDataManager(
         )
     }
 
-//    @Transactional
-//    fun makeStar(person: Person, )
+    /**
+     * Record that a person starred a repository at the given time.
+     */
+    @Transactional
+    fun recordStar(person: Person, repoId: RepoId, starredAt: Instant) {
+        // TODO create a relationship with the property
+        println("******** Recording star: person='${person.github?.login}', repo=$repoId")
+    }
 
     @Transactional
     fun <T> save(entity: T): T {

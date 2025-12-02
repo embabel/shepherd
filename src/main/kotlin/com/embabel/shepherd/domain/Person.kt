@@ -3,15 +3,22 @@ package com.embabel.shepherd.domain
 import org.kohsuke.github.GHUser
 import java.util.*
 
+/**
+ * Person's GitHub profile information.
+ * @param type indicates whether the profile is a User or an Organization.
+ */
 data class GitHubProfile(
     val login: String,
     val name: String?,
     val bio: String?,
     val blog: String?,
     val location: String?,
-    val type: String, // User or Organization
+    val type: String,
     val publicRepoCount: Int,
+    val followers: Int,
     val avatarUrl: String?,
+    val htmlUrl: String?,
+    val twitter: String? = null,
 )
 
 /**
@@ -36,6 +43,7 @@ interface Person : HasUUID {
             employer = employer,
         )
 
+        @JvmStatic
         fun fromGHUser(ghUser: GHUser, employer: Organization? = null): Person {
             val github = GitHubProfile(
                 login = ghUser.login,
@@ -45,7 +53,10 @@ interface Person : HasUUID {
                 location = ghUser.location,
                 type = ghUser.type,
                 publicRepoCount = ghUser.publicRepoCount,
+                followers = ghUser.followersCount,
                 avatarUrl = ghUser.avatarUrl,
+                htmlUrl = ghUser.htmlUrl?.toString(),
+                twitter = ghUser.twitterUsername,
             )
             return PersonImpl(
                 uuid = UUID.randomUUID(),
