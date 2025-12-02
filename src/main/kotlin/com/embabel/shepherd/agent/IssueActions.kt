@@ -80,7 +80,7 @@ class IssueActions(
             ghIssue.number, ghIssue.title
         )
 
-        val firstResponse = ai
+        val issueAssessment = ai
             .withLlm(properties.triageLlm)
             .withId("issue_response")
             .creating(IssueAssessment::class.java)
@@ -94,17 +94,17 @@ class IssueActions(
         logger.info(
             "Assessed issue #{}: comment='{}', urgency={}, sentiment={}",
             ghIssue.number,
-            firstResponse.comment,
-            firstResponse.urgency,
-            firstResponse.sentiment,
+            issueAssessment.comment,
+            issueAssessment.urgency,
+            issueAssessment.sentiment,
         )
 
         gitHubUpdater.labelIssue(
             ghIssue,
-            firstResponse.labels
+            issueAssessment.labels
         )
 
-        return firstResponse
+        return issueAssessment
     }
 
     @Action(
@@ -122,7 +122,7 @@ class IssueActions(
             ghIssue.number, ghIssue.title
         )
 
-        val firstResponse = ai
+        val pullRequestAssessment = ai
             .withLlm(properties.triageLlm)
             .withId("pr_response")
             .withoutProperties("filesChanged")
@@ -136,12 +136,12 @@ class IssueActions(
         logger.info(
             "Assessed PR #{}: comment='{}', urgency={}, sentiment={}",
             ghIssue.number,
-            firstResponse.comment,
-            firstResponse.urgency,
-            firstResponse.sentiment,
+            pullRequestAssessment.comment,
+            pullRequestAssessment.urgency,
+            pullRequestAssessment.sentiment,
         )
 
-        return firstResponse
+        return pullRequestAssessment
     }
 
     // TODO note that naming comes from blackboard, not parameter name

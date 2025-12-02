@@ -1,11 +1,17 @@
 package com.embabel.shepherd.service
 
+/**
+ * Represents the status of an entity that may be newly created or existing.
+ * If the entity is new, it may have other new related entities to be saved as well.
+ * Callers may want to be aware of this: for example, to save all new entities in a batch
+ * or to react to a newly created entities other than the main one.
+ */
 sealed interface EntityStatus<T : Any> {
     val entity: T
     val created: Boolean
 
     /**
-     * All entities created along with this one
+     * All entities created including [entity] itself if it is new.
      */
     val newEntities: List<Any>
 
@@ -55,5 +61,8 @@ data class ExistingEntity<T : Any>(
 ) : EntityStatus<T> {
     override val created: Boolean = false
 
+    /**
+     * No new entities since this is an existing entity
+     */
     override val newEntities: List<Any> = emptyList()
 }

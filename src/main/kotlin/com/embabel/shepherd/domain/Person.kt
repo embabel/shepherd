@@ -2,7 +2,9 @@ package com.embabel.shepherd.domain
 
 import java.util.*
 
-
+/**
+ * Person who is a member of the community.
+ */
 interface Person : HasUUID {
     val name: String
     val bio: String?
