@@ -72,19 +72,22 @@ class CompositeIdExtractor(
     }
 }
 
+interface SaveTemplate {
+
+    fun <T> save(entity: T): T
+}
+
 /**
  * Template that returns mixins
  */
-interface MixinTemplate {
+interface MixinTemplate : SaveTemplate {
 
     fun <T> findById(id: String, clazz: Class<T>, mixins: List<Class<out T>>): T?
 
     fun <T> findById(id: String, clazz: Class<T>): T? = findById(id, clazz, emptyList())
 
     fun <T, U : T> findById(id: String, clazz: Class<T>, mixin: Class<U>): U?
-
-    fun <T> save(entity: T): T
-
+    
     fun <T, U : T> eraseSpecialization(entity: U, mixin: Class<U>): T?
 
     fun <T> findAll(classType: Class<T>): Iterable<T>

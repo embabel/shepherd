@@ -6,7 +6,7 @@ import java.util.*
 /**
  * A GitHub repository.
  */
-data class Repository(
+data class GitHubRepository(
     val owner: String,
     val name: String,
     override val uuid: UUID = UUID.randomUUID(),
@@ -22,10 +22,10 @@ data class Repository(
         /**
          * Parse a full repository name (owner/name) into a Repository.
          */
-        fun fromFullName(fullName: String): Repository {
+        fun fromFullName(fullName: String): GitHubRepository {
             val parts = fullName.split("/")
             require(parts.size == 2) { "Invalid repository full name: $fullName" }
-            return Repository(owner = parts[0], name = parts[1])
+            return GitHubRepository(owner = parts[0], name = parts[1])
         }
     }
 }

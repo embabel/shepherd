@@ -28,15 +28,15 @@ class CommunityDataManager(
      * Retrieve an existing repository by owner and name, or create a new one.
      */
     @Transactional
-    fun retrieveOrCreateRepository(owner: String, name: String): EntityStatus<Repository> {
+    fun retrieveOrCreateRepository(owner: String, name: String): EntityStatus<GitHubRepository> {
         return EntityStatus.retrieveOrCreate(
             {
                 // TODO make efficient
-                mixinTemplate.findAll(Repository::class.java)
+                mixinTemplate.findAll(GitHubRepository::class.java)
                     .find { it.owner == owner && it.name == name }
             }
         ) {
-            NewEntity(Repository(owner = owner, name = name), emptyList())
+            NewEntity(GitHubRepository(owner = owner, name = name), emptyList())
         }
     }
 

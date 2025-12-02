@@ -91,7 +91,7 @@ class ShepherdShell(
 
     @ShellMethod
     fun repos() {
-        val repositories = mixinTemplate.findAll<Repository>()
+        val repositories = mixinTemplate.findAll<GitHubRepository>()
         for (repo in repositories) {
             println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(repo))
         }

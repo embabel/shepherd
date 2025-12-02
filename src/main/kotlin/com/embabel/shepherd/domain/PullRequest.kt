@@ -3,6 +3,7 @@ package com.embabel.shepherd.domain
 import org.kohsuke.github.GHIssueStateReason
 import org.kohsuke.github.GHPullRequest
 import org.kohsuke.github.GitHub
+import java.time.Instant
 import java.util.*
 
 interface PullRequest : Issue {
@@ -28,18 +29,18 @@ interface PullRequest : Issue {
      * Get the pull request details from GitHub API.
      * Delegates to Issue.materialize and casts to GHPullRequest.
      */
-    override fun materialize(github: GitHub): GHPullRequest {
-        val issue = super.materialize(github)
+    override fun materialize(service: GitHub): GHPullRequest {
+        val issue = super.materialize(service)
         return issue as? GHPullRequest
             ?: throw IllegalStateException("Expected GHPullRequest but got ${issue::class.simpleName} for PR #$number")
     }
 
     companion object {
-        fun fromGHPullRequest(ghPr: GHPullRequest, repository: Repository): PullRequest {
+        fun fromGHPullRequest(ghPr: GHPullRequest, gitHubRepository: GitHubRepository): PullRequest {
             return PullRequestImpl(
                 uuid = UUID.randomUUID(),
                 id = ghPr.id,
-                repository = repository,
+                gitHubRepository = gitHubRepository,
                 state = ghPr.state?.name,
                 stateReason = ghPr.stateReason,
                 number = ghPr.number,
@@ -74,7 +75,7 @@ interface PullRequest : Issue {
         operator fun invoke(
             uuid: UUID = UUID.randomUUID(),
             id: Long,
-            repository: Repository,
+            gitHubRepository: GitHubRepository,
             state: String? = null,
             stateReason: GHIssueStateReason? = null,
             number: Int,
@@ -103,7 +104,7 @@ interface PullRequest : Issue {
         ): PullRequest = PullRequestImpl(
             uuid = uuid,
             id = id,
-            repository = repository,
+            gitHubRepository = gitHubRepository,
             state = state,
             stateReason = stateReason,
             number = number,
@@ -136,7 +137,7 @@ interface PullRequest : Issue {
 internal data class PullRequestImpl(
     override val uuid: UUID,
     override val id: Long,
-    override val repository: Repository,
+    override val gitHubRepository: GitHubRepository,
     override val state: String?,
     override val stateReason: GHIssueStateReason?,
     override val number: Int,
@@ -162,4 +163,5 @@ internal data class PullRequestImpl(
     override val headBranch: String?,
     override val baseRepo: String?,
     override val headRepo: String?,
+    override val updatedAt: Instant = Instant.now(),
 ) : PullRequest
