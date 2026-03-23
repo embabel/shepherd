@@ -132,8 +132,8 @@ class IssueActions(
         val pullRequestAssessment = ai
             .withLlm(properties.triageLlm)
             .withId("pr_response")
-            .withoutProperties("filesChanged")
             .creating(PullRequestAssessment::class.java)
+            .withoutProperties("filesChanged")
             .fromTemplate(
                 "first_pr_response",
                 mapOf("pr" to ghIssue),

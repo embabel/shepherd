@@ -4,8 +4,6 @@ package com.embabel.shepherd.community.util
 import org.drivine.connection.ConnectionProperties
 import org.drivine.connection.DataSourceMap
 import org.drivine.connection.DatabaseType
-import org.drivine.connection.PropertyProvidedDataSourceMap
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.*
@@ -72,7 +70,6 @@ class Neo4jPropertiesInitializer : ApplicationContextInitializer<ConfigurableApp
 @ComponentScan(basePackages = ["org.drivine", "com.embabel"])
 @PropertySource("classpath:application.yml")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@EnableConfigurationProperties(value = [PropertyProvidedDataSourceMap::class])
 class TestAppContext {
 
     @Bean
